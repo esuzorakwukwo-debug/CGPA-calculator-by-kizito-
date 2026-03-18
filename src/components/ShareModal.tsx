@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Share2, Download, X, GraduationCap } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -20,34 +20,12 @@ export function ShareModal({ isOpen, onClose, cgpa, totalCredits, degreeClass }:
     
     setIsDownloading(true);
     try {
-      // 1. Strip complex CSS using onclone to prevent html2canvas from crashing
-      const canvas = await html2canvas(element, { 
-        scale: 3, 
-        useCORS: true,
-        backgroundColor: null, // Transparent background
-        onclone: (clonedDoc) => {
-          const clonedElement = clonedDoc.getElementById('share-card-content');
-          if (clonedElement) {
-            clonedElement.classList.remove('shadow-2xl');
-            const children = clonedElement.querySelectorAll('*');
-            children.forEach((child) => {
-              child.classList.remove(
-                'backdrop-blur-md',
-                'shadow-inner',
-                'shadow-lg',
-                'drop-shadow-sm'
-              );
-              // Fallback for removed blur to maintain visibility
-              if (child.classList.contains('bg-white/10')) {
-                child.classList.remove('bg-white/10');
-                child.classList.add('bg-white/20'); 
-              }
-            });
-          }
-        }
+      // Use html-to-image which supports modern CSS like oklch and backdrop-filter
+      const blob = await htmlToImage.toBlob(element, { 
+        pixelRatio: 3, 
+        backgroundColor: 'transparent'
       });
       
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('Failed to generate image blob');
 
       const fileName = 'CGPA_Pro_Result.png';
@@ -75,7 +53,10 @@ export function ShareModal({ isOpen, onClose, cgpa, totalCredits, degreeClass }:
 
       // Fallback to direct download if share wasn't successful or not supported
       if (!shared) {
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = await htmlToImage.toPng(element, { 
+          pixelRatio: 3, 
+          backgroundColor: 'transparent'
+        });
         const link = document.createElement('a');
         link.download = fileName;
         link.href = imgData;

@@ -11,7 +11,7 @@ import { SmartInsights } from './components/SmartInsights';
 import { ConfirmModal } from './components/ConfirmModal';
 import { ShareModal } from './components/ShareModal';
 import { calculateCGPA, getDegreeClass } from './utils';
-import html2canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 export default function App() {
@@ -76,21 +76,60 @@ export default function App() {
     
     setIsExporting(true);
     try {
-      const canvas = await html2canvas(element, { 
-        scale: 2, 
-        useCORS: true, 
-        backgroundColor: isDark ? '#030712' : '#f9fafb' 
+      // Use JPEG with lower pixel ratio and quality to drastically reduce file size
+      const imgData = await htmlToImage.toJpeg(element, { 
+        pixelRatio: 1.5, 
+        quality: 0.8,
+        backgroundColor: isDark ? '#030712' : '#f9fafb',
+        width: element.scrollWidth,
+        height: element.scrollHeight,
       });
-      const imgData = canvas.toDataURL('image/png');
       
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const maxPdfWidth = pageWidth - margin * 2;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // Calculate dimensions (1px = ~0.264583mm)
+      const pxToMm = 0.264583;
+      let pdfImgWidth = element.scrollWidth * pxToMm;
+      let pdfImgHeight = element.scrollHeight * pxToMm;
+      
+      // Scale appropriately (don't blow up mobile views to massive sizes)
+      if (pdfImgWidth > maxPdfWidth) {
+        const ratio = maxPdfWidth / pdfImgWidth;
+        pdfImgWidth *= ratio;
+        pdfImgHeight *= ratio;
+      } else {
+        // Scale up slightly for mobile, but cap at 1.5x or max width
+        const ratio = Math.min(maxPdfWidth / pdfImgWidth, 1.5);
+        pdfImgWidth *= ratio;
+        pdfImgHeight *= ratio;
+      }
+      
+      const xOffset = (pageWidth - pdfImgWidth) / 2;
+      
+      // Pagination logic for long content
+      let yPosition = margin;
+      let heightLeft = pdfImgHeight;
+      let pageIndex = 0;
+      const usablePageHeight = pageHeight - margin * 2;
+
+      while (heightLeft > 0) {
+        if (pageIndex > 0) {
+          pdf.addPage();
+          yPosition = margin - (pageIndex * usablePageHeight);
+        }
+        pdf.addImage(imgData, 'JPEG', xOffset, yPosition, pdfImgWidth, pdfImgHeight, undefined, 'FAST');
+        heightLeft -= usablePageHeight;
+        pageIndex++;
+      }
+      
       pdf.save('CGPA_Report.pdf');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Export failed', error);
+      alert(`Failed to export PDF: ${error?.message || 'Unknown error'}`);
     } finally {
       setIsExporting(false);
     }
@@ -306,7 +345,15 @@ export default function App() {
         degreeClass={degreeClass}
       />
 
-      <footer className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-auto text-center w-full">
+      <footer className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-auto text-center w-full flex flex-col items-center gap-4">
+        {semesters.length > 0 && (
+          <button
+            onClick={() => setIsResetting(true)}
+            className="text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors underline underline-offset-4"
+          >
+            Clear All Data
+          </button>
+        )}
         <p className="text-sm text-gray-400 dark:text-gray-500">
           Built by <span className="font-medium text-gray-600 dark:text-gray-300">Kizito Atelier</span>
         </p>
