@@ -20,20 +20,71 @@ export function ShareModal({ isOpen, onClose, cgpa, totalCredits, degreeClass }:
     
     setIsDownloading(true);
     try {
-      // Use scale 3 for high-res output suitable for Instagram/WhatsApp
+      // 1. Strip complex CSS using onclone to prevent html2canvas from crashing
       const canvas = await html2canvas(element, { 
         scale: 3, 
         useCORS: true,
-        backgroundColor: null // Transparent background
+        backgroundColor: null, // Transparent background
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById('share-card-content');
+          if (clonedElement) {
+            clonedElement.classList.remove('shadow-2xl');
+            const children = clonedElement.querySelectorAll('*');
+            children.forEach((child) => {
+              child.classList.remove(
+                'backdrop-blur-md',
+                'shadow-inner',
+                'shadow-lg',
+                'drop-shadow-sm'
+              );
+              // Fallback for removed blur to maintain visibility
+              if (child.classList.contains('bg-white/10')) {
+                child.classList.remove('bg-white/10');
+                child.classList.add('bg-white/20'); 
+              }
+            });
+          }
+        }
       });
-      const imgData = canvas.toDataURL('image/png');
       
-      const link = document.createElement('a');
-      link.download = 'CGPA_Pro_Result.png';
-      link.href = imgData;
-      link.click();
-    } catch (error) {
-      console.error('Download failed', error);
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Failed to generate image blob');
+
+      const fileName = 'CGPA_Pro_Result.png';
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      let shared = false;
+
+      // 3. Try Web Share API first
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: 'My CGPA Result',
+            text: `I just checked my CGPA on CGPA Pro! I'm graduating with a ${degreeClass}.`,
+            files: [file],
+          });
+          shared = true;
+        } catch (shareError: any) {
+          console.warn('Share failed or was cancelled:', shareError);
+          // If user manually cancelled the share dialog, do not force a download
+          if (shareError.name === 'AbortError') {
+            shared = true; 
+          }
+        }
+      }
+
+      // Fallback to direct download if share wasn't successful or not supported
+      if (!shared) {
+        const imgData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = imgData;
+        link.click();
+      }
+    } catch (error: any) {
+      // 2. Explicit error logging and alert
+      console.error('Download/Share failed:', error);
+      alert(`Failed to generate or share image: ${error?.message || 'Unknown error'}`);
     } finally {
       setIsDownloading(false);
     }
