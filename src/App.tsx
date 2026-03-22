@@ -28,7 +28,9 @@ export default function App() {
   const [isResetting, setIsResetting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    return sessionStorage.getItem('hasSeenSplash') !== 'true';
+  });
 
   const cgpa = calculateCGPA(semesters);
   const totalCredits = semesters.reduce((sum, sem) => 
@@ -45,11 +47,14 @@ export default function App() {
   }, [isDark]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, []);
+    if (showSplash) {
+      sessionStorage.setItem('hasSeenSplash', 'true');
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSplash]);
 
   const handleAddSemester = () => {
     const newSemester: Semester = {
