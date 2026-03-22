@@ -11,6 +11,7 @@ import { SmartInsights } from './components/SmartInsights';
 import { CgpaPlanner } from './components/CgpaPlanner';
 import { ConfirmModal } from './components/ConfirmModal';
 import { ShareModal } from './components/ShareModal';
+import { SplashScreen } from './components/SplashScreen';
 import { calculateCGPA, getDegreeClass } from './utils';
 import * as htmlToImage from 'html-to-image';
 import { jsPDF } from 'jspdf';
@@ -27,6 +28,7 @@ export default function App() {
   const [isResetting, setIsResetting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   const cgpa = calculateCGPA(semesters);
   const totalCredits = semesters.reduce((sum, sem) => 
@@ -41,6 +43,13 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAddSemester = () => {
     const newSemester: Semester = {
@@ -137,8 +146,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50/50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
+    <>
+      <AnimatePresence>
+        {showSplash && <SplashScreen />}
+      </AnimatePresence>
+
+      <div className="min-h-screen flex flex-col bg-gray-50/50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
+        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
@@ -361,5 +375,6 @@ export default function App() {
         </p>
       </footer>
     </div>
+    </>
   );
 }
