@@ -18,7 +18,7 @@ import { jsPDF } from 'jspdf';
 
 export default function App() {
   const [semesters, setSemesters] = useLocalStorage<Semester[]>('cgpa-pro-data', []);
-  const [isDark, setIsDark] = useLocalStorage('cgpa-pro-theme', false);
+  const [isDark, setIsDark] = useLocalStorage('cgpa-pro-theme', true);
   const [isAddingSemester, setIsAddingSemester] = useState(false);
   const [newLevel, setNewLevel] = useState(LEVELS[0]);
   const [newTerm, setNewTerm] = useState(TERMS[0]);
