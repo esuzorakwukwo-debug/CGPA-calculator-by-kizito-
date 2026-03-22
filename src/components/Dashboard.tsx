@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { motion } from 'motion/react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { calculateCGPA, getDegreeClass, calculateGPA } from '../utils';
 import { Semester } from '../types';
-import { TrendingUp, TrendingDown, Minus, Award, BookOpen, GraduationCap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Award, BookOpen, GraduationCap, BarChart3 } from 'lucide-react';
 import { AnimatedNumber } from './AnimatedNumber';
 
 interface DashboardProps {
@@ -17,6 +19,39 @@ export function Dashboard({ semesters }: DashboardProps) {
   );
 
   const totalCourses = semesters.reduce((sum, sem) => sum + sem.courses.length, 0);
+
+  const gradeDistribution = useMemo(() => {
+    const dist = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
+    semesters.forEach(sem => {
+      sem.courses.forEach(course => {
+        if (dist[course.grade as keyof typeof dist] !== undefined) {
+          dist[course.grade as keyof typeof dist]++;
+        }
+      });
+    });
+    return [
+      { name: 'A', count: dist.A, color: '#10b981' }, // emerald-500
+      { name: 'B', count: dist.B, color: '#3b82f6' }, // blue-500
+      { name: 'C', count: dist.C, color: '#f59e0b' }, // amber-500
+      { name: 'D', count: dist.D, color: '#f97316' }, // orange-500
+      { name: 'E', count: dist.E, color: '#ef4444' }, // red-500
+      { name: 'F', count: dist.F, color: '#b91c1c' }, // red-700
+    ];
+  }, [semesters]);
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
+          <p className="text-sm font-medium text-gray-900 dark:text-white">Grade {label}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <span className="font-bold" style={{ color: payload[0].payload.color }}>{payload[0].value}</span> courses
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   // Calculate performance feedback
   let feedback = null;
@@ -116,6 +151,51 @@ export function Dashboard({ semesters }: DashboardProps) {
           </div>
         </div>
       </motion.div>
+
+      {totalCourses > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="col-span-1 md:col-span-3 bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-800 transition-all duration-300"
+        >
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <BarChart3 size={18} />
+            </div>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Grade Distribution</h3>
+          </div>
+          
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={gradeDistribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#9ca3af', fontSize: 12 }} 
+                  dy={10}
+                />
+                <YAxis 
+                  allowDecimals={false} 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#9ca3af', fontSize: 12 }} 
+                />
+                <Tooltip 
+                  content={<CustomTooltip />}
+                  cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }}
+                />
+                <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                  {gradeDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

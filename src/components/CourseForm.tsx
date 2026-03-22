@@ -13,16 +13,31 @@ export function CourseForm({ onAdd, onCancel, initialData, isEdit }: CourseFormP
   const [title, setTitle] = useState(initialData?.title || '');
   const [creditUnit, setCreditUnit] = useState(initialData?.creditUnit.toString() || '');
   const [grade, setGrade] = useState<Grade | ''>(initialData?.grade || '');
+  const [titleError, setTitleError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !creditUnit || !grade) return;
+    
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      setTitleError('Course title cannot be empty.');
+      return;
+    }
+    
+    if (!/[a-zA-Z0-9]/.test(trimmedTitle)) {
+      setTitleError('Course title must contain letters or numbers.');
+      return;
+    }
+    
+    setTitleError(null);
+
+    if (!creditUnit || !grade) return;
     
     const credits = parseInt(creditUnit, 10);
     if (isNaN(credits) || credits <= 0) return;
 
     onAdd({
-      title: title.trim(),
+      title: trimmedTitle,
       creditUnit: credits,
       grade: grade as Grade,
     });
@@ -35,18 +50,24 @@ export function CourseForm({ onAdd, onCancel, initialData, isEdit }: CourseFormP
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 items-end sm:items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700/50 transition-colors">
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 items-start bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700/50 transition-colors">
       <div className="flex-1 w-full">
         <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Course Title</label>
         <input
           type="text"
           autoFocus
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            if (titleError) setTitleError(null);
+          }}
           placeholder="e.g. MTH 101"
-          className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+          className={`w-full px-3 py-2 bg-white dark:bg-gray-900 border ${titleError ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500' : 'border-gray-200 dark:border-gray-700 focus:ring-indigo-500/50 focus:border-indigo-500'} rounded-lg focus:outline-none focus:ring-2 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500`}
           required
         />
+        {titleError && (
+          <p className="text-xs text-red-500 mt-1.5 font-medium">{titleError}</p>
+        )}
       </div>
       <div className="w-full sm:w-24">
         <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Credits</label>
@@ -78,23 +99,26 @@ export function CourseForm({ onAdd, onCancel, initialData, isEdit }: CourseFormP
           <option value="F">F (0)</option>
         </select>
       </div>
-      <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-        <button
-          type="submit"
-          className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
-        >
-          {isEdit ? <Check size={16} /> : <Plus size={16} />}
-          {isEdit ? 'Save' : 'Add'}
-        </button>
-        {isEdit && onCancel && (
+      <div className="flex flex-col w-full sm:w-auto mt-2 sm:mt-0">
+        <label className="hidden sm:block text-xs mb-1">&nbsp;</label>
+        <div className="flex gap-2 h-[38px]">
           <button
-            type="button"
-            onClick={onCancel}
-            className="flex items-center justify-center p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+            type="submit"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm h-full"
           >
-            <X size={16} />
+            {isEdit ? <Check size={16} /> : <Plus size={16} />}
+            {isEdit ? 'Save' : 'Add'}
           </button>
-        )}
+          {isEdit && onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex items-center justify-center px-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors h-full"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
     </form>
   );
