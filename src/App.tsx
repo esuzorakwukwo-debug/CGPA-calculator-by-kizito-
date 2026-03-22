@@ -8,6 +8,7 @@ import { Dashboard } from './components/Dashboard';
 import { SemesterCard } from './components/SemesterCard';
 import { TargetSimulator } from './components/TargetSimulator';
 import { SmartInsights } from './components/SmartInsights';
+import { CgpaPlanner } from './components/CgpaPlanner';
 import { ConfirmModal } from './components/ConfirmModal';
 import { ShareModal } from './components/ShareModal';
 import { calculateCGPA, getDegreeClass } from './utils';
@@ -196,6 +197,7 @@ export default function App() {
         <Dashboard semesters={semesters} />
         <SmartInsights semesters={semesters} />
         <TargetSimulator semesters={semesters} />
+        <CgpaPlanner semesters={semesters} />
 
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Semesters</h2>
