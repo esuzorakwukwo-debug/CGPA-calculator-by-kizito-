@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronRight } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 
 interface TourStep {
   id: string;
@@ -64,6 +64,7 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
 
   const currentStep = TOUR_STEPS[currentStepIndex];
 
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -72,6 +73,19 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Smooth scroll to target when step changes
+  useEffect(() => {
+    if (!isActive || !currentStep) return;
+    
+    const targetEl = document.getElementById(currentStep.targetId);
+    if (targetEl) {
+      setTimeout(() => {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [currentStep, isActive]);
+
+  // Update rects continuously for animations/resizes without interrupting scroll
   useEffect(() => {
     if (!isActive || !currentStep) return;
 
@@ -79,7 +93,6 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
       const targetEl = document.getElementById(currentStep.targetId);
       if (targetEl) {
         setTargetRect(targetEl.getBoundingClientRect());
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
         setTargetRect(null);
       }
@@ -94,9 +107,8 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
       }
     };
 
-    // Small delay to allow UI to render/animate
-    const timeoutId = setTimeout(updateRects, 300);
-    const intervalId = setInterval(updateRects, 1000); // Keep it updated if things move
+    const timeoutId = setTimeout(updateRects, 50);
+    const intervalId = setInterval(updateRects, 100); // Fast update for smooth tracking
 
     return () => {
       clearTimeout(timeoutId);
@@ -104,6 +116,45 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
     };
   }, [currentStep, isActive, windowSize]);
 
+  // Handle z-index for highlighted elements (The Blur Bug Fix)
+  useEffect(() => {
+    if (!isActive || !currentStep) return;
+
+    const targetIds = currentStep.highlightIds || [currentStep.targetId];
+    const elements = targetIds.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+
+    // Store original styles to restore them later
+    const originalStyles = elements.map(el => ({
+      position: el.style.getPropertyValue('position'),
+      positionPriority: el.style.getPropertyPriority('position'),
+      zIndex: el.style.getPropertyValue('z-index'),
+      zIndexPriority: el.style.getPropertyPriority('z-index'),
+    }));
+
+    elements.forEach(el => {
+      el.style.setProperty('position', 'relative', 'important');
+      el.style.setProperty('z-index', '9999', 'important');
+    });
+
+    return () => {
+      elements.forEach((el, index) => {
+        const orig = originalStyles[index];
+        if (orig.position) {
+          el.style.setProperty('position', orig.position, orig.positionPriority);
+        } else {
+          el.style.removeProperty('position');
+        }
+        
+        if (orig.zIndex) {
+          el.style.setProperty('z-index', orig.zIndex, orig.zIndexPriority);
+        } else {
+          el.style.removeProperty('z-index');
+        }
+      });
+    };
+  }, [currentStep, isActive]);
+
+  // Handle click-to-advance steps
   useEffect(() => {
     if (!isActive || !currentStep?.waitForClick) return;
 
@@ -119,11 +170,37 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
     return () => document.removeEventListener('click', handleClick);
   }, [currentStep, isActive]);
 
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isActive) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleSkip();
+      } else if (e.key === 'ArrowRight') {
+        if (!currentStep?.waitForClick) {
+          handleNext();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        handleBack();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isActive, currentStepIndex, currentStep]);
+
   const handleNext = () => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
     } else {
       onComplete();
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(prev => prev - 1);
     }
   };
 
@@ -136,95 +213,119 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
   return (
     <AnimatePresence>
       {isActive && currentStep && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4 }}
-          className="fixed inset-0 z-[100] pointer-events-none"
-        >
-          {/* Dimmed Background Overlay */}
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-
-          {/* Highlights */}
-      {rectsToDraw.map((rect, i) => (
-        <motion.div
-          key={`${currentStep.id}-highlight-${i}`}
-          initial={false}
-          animate={{
-            top: rect.top - 10,
-            left: rect.left - 10,
-            width: rect.width + 20,
-            height: rect.height + 20,
-          }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="absolute bg-transparent border-2 border-indigo-500 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.5)] pointer-events-none z-[101]"
-        />
-      ))}
-
-      {/* Tooltip */}
-      <AnimatePresence mode="wait">
-        {targetRect && (
-          <motion.div
-            key={currentStep.id}
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="absolute z-[102] pointer-events-auto w-full max-w-sm"
-            style={{
-              top: targetRect.bottom + 24 > windowSize.height - 200 
-                ? Math.max(16, targetRect.top - 200)
-                : targetRect.bottom + 24,
-              left: Math.max(16, Math.min(targetRect.left, windowSize.width - 384 - 16)),
-            }}
+        <>
+          {/* Overlay Container - z-[9998] so target elements (z-[9999]) sit above it */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 z-[9998] pointer-events-none"
           >
-            <div className="bg-gray-900 dark:bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-2xl text-white">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex gap-1.5">
-                  {TOUR_STEPS.map((_, i) => (
-                    <div 
-                      key={i} 
-                      className={`h-1.5 rounded-full transition-all duration-300 ${i === currentStepIndex ? 'w-6 bg-indigo-500' : 'w-1.5 bg-gray-700'}`}
-                    />
-                  ))}
-                </div>
-                <button 
-                  onClick={handleSkip}
-                  className="text-gray-400 hover:text-white transition-colors text-xs font-medium"
-                >
-                  Skip
-                </button>
-              </div>
-              
-              <p className="text-sm leading-relaxed text-gray-200 whitespace-pre-wrap">
-                {currentStep.text}
-              </p>
+            {/* Dimmed Background Overlay */}
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-[4px]" />
 
-              {!currentStep.waitForClick && (
-                <div className="mt-5 flex justify-end">
-                  <button
-                    onClick={handleNext}
-                    className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
-                  >
-                    {currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              )}
-              {currentStep.waitForClick && (
-                <div className="mt-4 flex justify-end">
-                  <span className="text-xs text-indigo-400 animate-pulse flex items-center gap-1">
-                    Click the highlighted button to continue <ChevronRight size={14} />
-                  </span>
-                </div>
-              )}
-            </div>
+            {/* Highlights */}
+            {rectsToDraw.map((rect, i) => (
+              <motion.div
+                key={`${currentStep.id}-highlight-${i}`}
+                initial={false}
+                animate={{
+                  top: rect.top - 10,
+                  left: rect.left - 10,
+                  width: rect.width + 20,
+                  height: rect.height + 20,
+                }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="absolute bg-transparent border-2 border-indigo-500 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.5)] pointer-events-none"
+              />
+            ))}
           </motion.div>
-        )}
-      </AnimatePresence>
-        </motion.div>
+
+          {/* Tooltip Container - z-[10000] so it sits above both overlay and target elements */}
+          <motion.div className="fixed inset-0 z-[10000] pointer-events-none">
+            <AnimatePresence mode="wait">
+              {targetRect && (
+                <motion.div
+                  key={currentStep.id}
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -15, scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  className="absolute pointer-events-auto w-full max-w-sm"
+                  style={{
+                    top: targetRect.bottom + 24 > windowSize.height - 200 
+                      ? Math.max(16, targetRect.top - 200)
+                      : targetRect.bottom + 24,
+                    left: Math.max(16, Math.min(targetRect.left, windowSize.width - 384 - 16)),
+                  }}
+                >
+                  <div className="bg-gray-900 dark:bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-2xl text-white">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex gap-1.5">
+                        {TOUR_STEPS.map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={`h-1.5 rounded-full transition-all duration-300 ${i === currentStepIndex ? 'w-6 bg-indigo-500' : 'w-1.5 bg-gray-700'}`}
+                          />
+                        ))}
+                      </div>
+                      <button 
+                        onClick={handleSkip}
+                        className="text-gray-400 hover:text-white transition-colors text-xs font-medium"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    
+                    <p className="text-sm leading-relaxed text-gray-200 whitespace-pre-wrap">
+                      {currentStep.text}
+                    </p>
+
+                    <div className="mt-5 flex items-center justify-between">
+                      <button
+                        onClick={handleSkip}
+                        className="text-gray-400 hover:text-white transition-colors text-sm font-medium"
+                      >
+                        Skip Tour
+                      </button>
+
+                      <div className="flex gap-2">
+                        {currentStepIndex > 0 && (
+                          <button
+                            onClick={handleBack}
+                            className="flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-xl text-sm font-medium transition-colors"
+                          >
+                            <ChevronLeft size={16} />
+                          </button>
+                        )}
+                        {!currentStep.waitForClick && (
+                          <button
+                            onClick={handleNext}
+                            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+                          >
+                            {currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}
+                            {currentStepIndex !== TOUR_STEPS.length - 1 && <ChevronRight size={16} />}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {currentStep.waitForClick && (
+                      <div className="mt-4 flex justify-end">
+                        <span className="text-xs text-indigo-400 animate-pulse flex items-center gap-1">
+                          Click the highlighted button to continue <ChevronRight size={14} />
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   );
 }
+
