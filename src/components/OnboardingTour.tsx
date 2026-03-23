@@ -131,16 +131,22 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
     onComplete();
   };
 
-  if (!isActive || !currentStep) return null;
-
   const rectsToDraw = highlightRects.length > 0 ? highlightRects : (targetRect ? [targetRect] : []);
 
   return (
-    <div className="fixed inset-0 z-[100] pointer-events-none">
-      {/* Dimmed Background Overlay */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-[4px] transition-opacity duration-300" />
+    <AnimatePresence>
+      {isActive && currentStep && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          className="fixed inset-0 z-[100] pointer-events-none"
+        >
+          {/* Dimmed Background Overlay */}
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
 
-      {/* Highlights */}
+          {/* Highlights */}
       {rectsToDraw.map((rect, i) => (
         <motion.div
           key={`${currentStep.id}-highlight-${i}`}
@@ -217,6 +223,8 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
