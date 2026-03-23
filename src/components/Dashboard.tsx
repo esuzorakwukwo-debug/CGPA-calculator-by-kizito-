@@ -91,6 +91,7 @@ export function Dashboard({ semesters }: DashboardProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
       <motion.div
+        id="tour-dashboard-gpa"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="col-span-1 md:col-span-2 bg-gradient-to-br from-indigo-600 to-violet-700 dark:from-indigo-900 dark:to-violet-950 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden transition-colors duration-300"

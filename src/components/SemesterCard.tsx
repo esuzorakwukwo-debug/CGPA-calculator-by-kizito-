@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2, ChevronDown, ChevronUp, PlusCircle, BookOpen, ListPlus, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Semester, Course } from '../types';
@@ -9,17 +9,27 @@ import { ConfirmModal } from './ConfirmModal';
 
 interface SemesterCardProps {
   semester: Semester;
+  isFirst?: boolean;
+  forceExpand?: boolean;
   onUpdate: (id: string, updatedSemester: Semester) => void;
   onDelete: (id: string) => void;
 }
 
-export function SemesterCard({ semester, onUpdate, onDelete }: SemesterCardProps) {
+export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelete }: SemesterCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [isBulkAdding, setIsBulkAdding] = useState(false);
   const [bulkText, setBulkText] = useState('');
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (forceExpand) {
+      setIsExpanded(true);
+      setIsAddingCourse(false);
+      setIsBulkAdding(false);
+    }
+  }, [forceExpand]);
 
   const gpa = calculateGPA(semester.courses);
   const totalCredits = semester.courses.reduce((sum, c) => sum + c.creditUnit, 0);
@@ -249,8 +259,9 @@ export function SemesterCard({ semester, onUpdate, onDelete }: SemesterCardProps
                 )}
 
                 {!isAddingCourse && !isBulkAdding && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" id={isFirst ? "tour-add-method" : undefined}>
                     <button
+                      id={isFirst ? "tour-single-add" : undefined}
                       onClick={() => setIsAddingCourse(true)}
                       className="flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-xl transition-colors border border-indigo-100 dark:border-indigo-500/20 border-dashed"
                     >
@@ -258,6 +269,7 @@ export function SemesterCard({ semester, onUpdate, onDelete }: SemesterCardProps
                       Add Course
                     </button>
                     <button
+                      id={isFirst ? "tour-bulk-add" : undefined}
                       onClick={() => setIsBulkAdding(true)}
                       className="flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-xl transition-colors border border-emerald-100 dark:border-emerald-500/20 border-dashed"
                     >

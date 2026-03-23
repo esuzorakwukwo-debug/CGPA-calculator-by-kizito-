@@ -46,7 +46,7 @@ export function TargetSimulator({ semesters }: TargetSimulatorProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 mb-6 transition-colors">
+    <div id="tour-target-simulator" className="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 mb-6 transition-colors">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
           <Target size={20} />

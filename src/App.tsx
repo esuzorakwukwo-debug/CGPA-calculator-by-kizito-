@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, GraduationCap, Sun, Moon, Sparkles, Download, Share2 } from 'lucide-react';
+import { Plus, Trash2, GraduationCap, Sun, Moon, Sparkles, Download, Share2, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { Semester } from './types';
@@ -12,9 +12,25 @@ import { CgpaPlanner } from './components/CgpaPlanner';
 import { ConfirmModal } from './components/ConfirmModal';
 import { ShareModal } from './components/ShareModal';
 import { SplashScreen } from './components/SplashScreen';
+import { OnboardingTour } from './components/OnboardingTour';
 import { calculateCGPA, getDegreeClass } from './utils';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+const DUMMY_SEMESTERS: Semester[] = [
+  {
+    id: 'dummy-1',
+    level: '100L',
+    term: '1st Semester',
+    name: 'Year 1 First Semester',
+    courses: [
+      { id: 'c1', title: 'MTH 101', creditUnit: 3, grade: 'A' },
+      { id: 'c2', title: 'PHY 101', creditUnit: 3, grade: 'B' },
+      { id: 'c3', title: 'CHM 101', creditUnit: 3, grade: 'A' },
+      { id: 'c4', title: 'BIO 101', creditUnit: 3, grade: 'C' },
+    ]
+  }
+];
 
 export default function App() {
   const [semesters, setSemesters] = useLocalStorage<Semester[]>('cgpa-pro-data', []);
@@ -28,15 +44,25 @@ export default function App() {
   const [isResetting, setIsResetting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [showSplash, setShowSplash] = useState(() => {
-    return sessionStorage.getItem('hasSeenSplash') !== 'true';
-  });
+  const [hasSeenSplash, setHasSeenSplash] = useLocalStorage('cgpa-pro-splash-seen', false);
+  const [hasSeenTour, setHasSeenTour] = useLocalStorage('cgpa-pro-tour-seen', false);
+  const [isTourActive, setIsTourActive] = useState(false);
+  const [showSplash, setShowSplash] = useState(() => !hasSeenSplash);
 
-  const cgpa = calculateCGPA(semesters);
-  const totalCredits = semesters.reduce((sum, sem) => 
+  // Use dummy data if tour is active and no real data exists
+  const displaySemesters = isTourActive && semesters.length === 0 ? DUMMY_SEMESTERS : semesters;
+
+  const cgpa = calculateCGPA(displaySemesters);
+  const totalCredits = displaySemesters.reduce((sum, sem) => 
     sum + sem.courses.reduce((cSum, c) => cSum + c.creditUnit, 0), 0
   );
   const degreeClass = getDegreeClass(cgpa).label;
+
+  useEffect(() => {
+    if (!showSplash && !hasSeenTour) {
+      setIsTourActive(true);
+    }
+  }, [showSplash, hasSeenTour]);
 
   useEffect(() => {
     if (isDark) {
@@ -48,13 +74,13 @@ export default function App() {
 
   useEffect(() => {
     if (showSplash) {
-      sessionStorage.setItem('hasSeenSplash', 'true');
+      setHasSeenSplash(true);
       const timer = setTimeout(() => {
         setShowSplash(false);
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [showSplash]);
+  }, [showSplash, setHasSeenSplash]);
 
   const handleAddSemester = () => {
     const newSemester: Semester = {
@@ -133,7 +159,7 @@ export default function App() {
       let finalY = (doc as any).lastAutoTable.finalY + 15;
 
       // Semester Tables
-      semesters.forEach((semester) => {
+      displaySemesters.forEach((semester) => {
         // Check if we need a new page for the header
         if (finalY > pageHeight - 40) {
           doc.addPage();
@@ -212,7 +238,18 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            {semesters.length > 0 && (
+            <button
+              onClick={() => {
+                setIsAddingSemester(false);
+                setIsTourActive(true);
+              }}
+              className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-1.5"
+              title="Help & Guide"
+            >
+              <HelpCircle size={18} />
+              <span className="hidden sm:inline text-sm font-medium">Guide</span>
+            </button>
+            {displaySemesters.length > 0 && (
               <>
                 <button
                   onClick={() => setIsShareModalOpen(true)}
@@ -223,6 +260,7 @@ export default function App() {
                   <span className="hidden sm:inline text-sm font-medium">Share</span>
                 </button>
                 <button
+                  id="tour-export-btn"
                   onClick={handleExport}
                   disabled={isExporting}
                   className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
@@ -240,7 +278,7 @@ export default function App() {
             >
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            {semesters.length > 0 && (
+            {displaySemesters.length > 0 && (
               <button
                 onClick={() => setIsResetting(true)}
                 className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-1.5 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -254,15 +292,16 @@ export default function App() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="export-content">
-        <Dashboard semesters={semesters} />
-        <SmartInsights semesters={semesters} />
-        <TargetSimulator semesters={semesters} />
-        <CgpaPlanner semesters={semesters} />
+        <Dashboard semesters={displaySemesters} />
+        <SmartInsights semesters={displaySemesters} />
+        <TargetSimulator semesters={displaySemesters} />
+        <CgpaPlanner semesters={displaySemesters} />
 
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Semesters</h2>
           {!isAddingSemester && (
             <button
+              id="tour-add-semester-btn"
               onClick={() => setIsAddingSemester(true)}
               className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-md shadow-indigo-500/20"
             >
@@ -343,7 +382,7 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {semesters.length === 0 && !isAddingSemester ? (
+        {displaySemesters.length === 0 && !isAddingSemester ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -366,12 +405,14 @@ export default function App() {
             </button>
           </motion.div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4" id="tour-semester-cards">
             <AnimatePresence>
-              {semesters.map((semester) => (
+              {displaySemesters.map((semester, index) => (
                 <SemesterCard
                   key={semester.id}
                   semester={semester}
+                  isFirst={index === 0}
+                  forceExpand={isTourActive && index === 0}
                   onUpdate={handleUpdateSemester}
                   onDelete={(id) => setSemesterToDelete(id)}
                 />
@@ -380,6 +421,14 @@ export default function App() {
           </div>
         )}
       </main>
+
+      <OnboardingTour 
+        isActive={isTourActive} 
+        onComplete={() => {
+          setIsTourActive(false);
+          setHasSeenTour(true);
+        }} 
+      />
 
       <ConfirmModal
         isOpen={semesterToDelete !== null}
