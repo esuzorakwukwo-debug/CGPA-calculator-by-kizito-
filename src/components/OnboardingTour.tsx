@@ -138,7 +138,7 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
       {/* Dimmed Background Overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-[4px] transition-opacity duration-300" />
 
       {/* Highlights */}
       {rectsToDraw.map((rect, i) => (
@@ -146,10 +146,10 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
           key={`${currentStep.id}-highlight-${i}`}
           initial={false}
           animate={{
-            top: rect.top - 8,
-            left: rect.left - 8,
-            width: rect.width + 16,
-            height: rect.height + 16,
+            top: rect.top - 10,
+            left: rect.left - 10,
+            width: rect.width + 20,
+            height: rect.height + 20,
           }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="absolute bg-transparent border-2 border-indigo-500 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.5)] pointer-events-none z-[101]"
