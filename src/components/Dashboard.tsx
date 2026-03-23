@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { calculateCGPA, getDegreeClass, calculateGPA } from '../utils';
@@ -11,6 +11,12 @@ interface DashboardProps {
 }
 
 export function Dashboard({ semesters }: DashboardProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const cgpa = calculateCGPA(semesters);
   const degreeClass = getDegreeClass(cgpa);
   
@@ -167,33 +173,35 @@ export function Dashboard({ semesters }: DashboardProps) {
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Grade Distribution</h3>
           </div>
           
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={gradeDistribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#9ca3af', fontSize: 12 }} 
-                  dy={10}
-                />
-                <YAxis 
-                  allowDecimals={false} 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#9ca3af', fontSize: 12 }} 
-                />
-                <Tooltip 
-                  content={<CustomTooltip />}
-                  cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }}
-                />
-                <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={60}>
-                  {gradeDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="w-full h-[300px] min-h-[300px]">
+            {isMounted && (
+              <ResponsiveContainer width="100%" height="100%" debounce={50}>
+                <BarChart data={gradeDistribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#9ca3af', fontSize: 12 }} 
+                    dy={10}
+                  />
+                  <YAxis 
+                    allowDecimals={false} 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#9ca3af', fontSize: 12 }} 
+                  />
+                  <Tooltip 
+                    content={<CustomTooltip />}
+                    cursor={{ fill: 'rgba(156, 163, 175, 0.1)' }}
+                  />
+                  <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                    {gradeDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </motion.div>
       )}

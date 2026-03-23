@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Target, TrendingUp, AlertCircle, CheckCircle2, Calculator, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Semester } from '../types';
 import { calculateCGPA } from '../utils';
 

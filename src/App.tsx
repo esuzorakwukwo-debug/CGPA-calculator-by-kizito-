@@ -13,6 +13,7 @@ import { ConfirmModal } from './components/ConfirmModal';
 import { ShareModal } from './components/ShareModal';
 import { SplashScreen } from './components/SplashScreen';
 import { OnboardingTour } from './components/OnboardingTour';
+import { SmartPdfScanner } from './components/SmartPdfScanner';
 import { calculateCGPA, getDegreeClass } from './utils';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -299,16 +300,41 @@ export default function App() {
 
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Semesters</h2>
-          {!isAddingSemester && (
-            <button
-              id="tour-add-semester-btn"
-              onClick={() => setIsAddingSemester(true)}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-md shadow-indigo-500/20"
-            >
-              <Plus size={16} />
-              Add Semester
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <SmartPdfScanner onDataExtracted={(newSemesters) => {
+              const updatedSemesters = [...semesters];
+              newSemesters.forEach(newSem => {
+                const existingSemIndex = updatedSemesters.findIndex(
+                  s => s.level === newSem.level && s.term === newSem.term
+                );
+                if (existingSemIndex >= 0) {
+                  // Merge courses into existing semester, avoiding duplicates by course title
+                  const existingCourses = updatedSemesters[existingSemIndex].courses;
+                  const newUniqueCourses = newSem.courses.filter(
+                    nc => !existingCourses.some(ec => ec.title.toLowerCase() === nc.title.toLowerCase())
+                  );
+                  updatedSemesters[existingSemIndex] = {
+                    ...updatedSemesters[existingSemIndex],
+                    courses: [...existingCourses, ...newUniqueCourses]
+                  };
+                } else {
+                  // Add as new semester
+                  updatedSemesters.push(newSem);
+                }
+              });
+              setSemesters(updatedSemesters);
+            }} />
+            {!isAddingSemester && (
+              <button
+                id="tour-add-semester-btn"
+                onClick={() => setIsAddingSemester(true)}
+                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-md shadow-indigo-500/20"
+              >
+                <Plus size={16} />
+                Add Semester
+              </button>
+            )}
+          </div>
         </div>
 
         <AnimatePresence>

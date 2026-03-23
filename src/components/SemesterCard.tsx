@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trash2, ChevronDown, ChevronUp, PlusCircle, BookOpen, ListPlus, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Semester, Course } from '../types';
@@ -8,6 +8,7 @@ import { calculateGPA } from '../utils';
 import { ConfirmModal } from './ConfirmModal';
 
 interface SemesterCardProps {
+  key?: React.Key;
   semester: Semester;
   isFirst?: boolean;
   forceExpand?: boolean;
