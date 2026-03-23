@@ -148,7 +148,7 @@ export default function App() {
         const tableData: any[] = semester.courses.map(course => {
           const points = (GRADE_POINTS[course.grade] || 0) * course.creditUnit;
           return [
-            course.code || 'Unnamed Course',
+            course.title || 'Unnamed Course',
             course.creditUnit.toString(),
             course.grade,
             points.toString()
