@@ -36,7 +36,6 @@ const TOUR_STEPS: TourStep[] = [
     id: 'step-5',
     targetId: 'tour-add-semester-btn',
     text: 'Start building your record. Add a new level or semester here.',
-    waitForClick: 'tour-add-semester-btn',
   },
   {
     id: 'step-6',
@@ -123,21 +122,48 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
     const targetIds = currentStep.highlightIds || [currentStep.targetId];
     const elements = targetIds.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
 
+    // Find all parents that create stacking contexts to elevate them too
+    const elementsToElevate = new Set<HTMLElement>();
+    
+    elements.forEach(el => {
+      elementsToElevate.add(el);
+      let parent = el.parentElement;
+      while (parent && parent !== document.body) {
+        const style = window.getComputedStyle(parent);
+        // If the parent has a z-index other than auto, or is sticky/fixed/absolute/relative, it might create a stacking context
+        if (
+          style.zIndex !== 'auto' || 
+          style.position === 'sticky' || 
+          style.position === 'fixed' ||
+          style.transform !== 'none' ||
+          style.opacity !== '1'
+        ) {
+          elementsToElevate.add(parent);
+        }
+        parent = parent.parentElement;
+      }
+    });
+
+    const elevatedElements = Array.from(elementsToElevate);
+
     // Store original styles to restore them later
-    const originalStyles = elements.map(el => ({
+    const originalStyles = elevatedElements.map(el => ({
       position: el.style.getPropertyValue('position'),
       positionPriority: el.style.getPropertyPriority('position'),
       zIndex: el.style.getPropertyValue('z-index'),
       zIndexPriority: el.style.getPropertyPriority('z-index'),
     }));
 
-    elements.forEach(el => {
-      el.style.setProperty('position', 'relative', 'important');
+    elevatedElements.forEach(el => {
+      const currentPos = window.getComputedStyle(el).position;
+      if (currentPos === 'static') {
+        el.style.setProperty('position', 'relative', 'important');
+      }
       el.style.setProperty('z-index', '9999', 'important');
     });
 
     return () => {
-      elements.forEach((el, index) => {
+      elevatedElements.forEach((el, index) => {
         const orig = originalStyles[index];
         if (orig.position) {
           el.style.setProperty('position', orig.position, orig.positionPriority);
@@ -170,7 +196,7 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
     return () => document.removeEventListener('click', handleClick);
   }, [currentStep, isActive]);
 
-  // Keyboard navigation
+  // Keyboard navigation and click blocking
   useEffect(() => {
     if (!isActive) return;
 
@@ -186,8 +212,43 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
       }
     };
 
+    const blockInteractions = (e: Event) => {
+      // Allow clicks inside the tooltip
+      const tooltip = document.getElementById('tour-tooltip');
+      if (tooltip && tooltip.contains(e.target as Node)) {
+        return;
+      }
+      
+      // If it's a waitForClick step, allow clicks on the target
+      if (currentStep?.waitForClick) {
+        const target = document.getElementById(currentStep.waitForClick);
+        if (target && target.contains(e.target as Node)) {
+          return;
+        }
+      }
+
+      // Otherwise, block the interaction
+      e.stopPropagation();
+      e.preventDefault();
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    
+    // Block clicks and touches outside the tooltip
+    document.addEventListener('click', blockInteractions, true);
+    document.addEventListener('mousedown', blockInteractions, true);
+    document.addEventListener('mouseup', blockInteractions, true);
+    document.addEventListener('touchstart', blockInteractions, true);
+    document.addEventListener('touchend', blockInteractions, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('click', blockInteractions, true);
+      document.removeEventListener('mousedown', blockInteractions, true);
+      document.removeEventListener('mouseup', blockInteractions, true);
+      document.removeEventListener('touchstart', blockInteractions, true);
+      document.removeEventListener('touchend', blockInteractions, true);
+    };
   }, [isActive, currentStepIndex, currentStep]);
 
   const handleNext = () => {
@@ -242,12 +303,13 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
             ))}
           </motion.div>
 
-          {/* Tooltip Container - z-[10000] so it sits above both overlay and target elements */}
-          <motion.div className="fixed inset-0 z-[10000] pointer-events-none">
+          {/* Tooltip Container - z-[10001] so it sits above both overlay and target elements */}
+          <motion.div className="fixed inset-0 z-[10001] pointer-events-none">
             <AnimatePresence mode="wait">
               {targetRect && (
                 <motion.div
                   key={currentStep.id}
+                  id="tour-tooltip"
                   initial={{ opacity: 0, y: 15, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -15, scale: 0.95 }}
