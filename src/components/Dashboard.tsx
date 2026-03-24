@@ -175,7 +175,7 @@ export function Dashboard({ semesters }: DashboardProps) {
           
           <div className="w-full h-[300px] min-h-[300px]">
             {isMounted && (
-              <ResponsiveContainer width="100%" height="100%" debounce={50}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={50}>
                 <BarChart data={gradeDistribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <XAxis 
                     dataKey="name" 
