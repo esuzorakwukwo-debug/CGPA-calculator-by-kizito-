@@ -26,26 +26,22 @@ export default defineConfig(({mode}) => {
             {
               src: '/icon-192.png',
               sizes: '192x192',
-              type: 'image/png',
-              purpose: 'any'
+              type: 'image/png'
             },
             {
-              src: '/icon-192.png',
+              src: '/icon-512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: '/icon-192x192.svg',
               sizes: '192x192',
-              type: 'image/png',
-              purpose: 'maskable'
+              type: 'image/svg+xml'
             },
             {
-              src: '/icon-512.png',
+              src: '/icon-512x512.svg',
               sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: '/icon-512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable'
+              type: 'image/svg+xml'
             }
           ]
         },
