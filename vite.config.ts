@@ -12,7 +12,7 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['icon-192.png', 'icon-512.png'],
+        includeAssets: ['icon-192.png', 'icon-512.png', 'icon-192x192.svg', 'icon-512x512.svg'],
         manifest: {
           name: 'CGPA Pro by Kizito',
           short_name: 'CGPA Pro',
@@ -26,13 +26,25 @@ export default defineConfig(({mode}) => {
               src: '/icon-192.png',
               sizes: '192x192',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'any'
+            },
+            {
+              src: '/icon-192.png',
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'maskable'
             },
             {
               src: '/icon-512.png',
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'any'
+            },
+            {
+              src: '/icon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
             }
           ]
         },
