@@ -51,7 +51,18 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
 
       setProgressMessage('Analyzing courses and credits...');
       
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      try {
+        if (!apiKey) {
+          apiKey = process.env.GEMINI_API_KEY;
+        }
+      } catch (e) {
+        // Ignore ReferenceError if process is not defined
+      }
+      
+      if (!apiKey) throw new Error("An API Key must be set when running in a browser");
+
+      const ai = new GoogleGenAI({ apiKey });
       
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',

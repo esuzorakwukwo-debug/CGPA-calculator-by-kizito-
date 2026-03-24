@@ -12,6 +12,7 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        manifestFilename: 'manifest.json',
         includeAssets: ['icon-192.png', 'icon-512.png', 'icon-192x192.svg', 'icon-512x512.svg'],
         manifest: {
           name: 'CGPA Pro by Kizito',

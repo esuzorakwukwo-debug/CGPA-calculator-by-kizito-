@@ -74,6 +74,12 @@ export default function App() {
   }, [isDark]);
 
   useEffect(() => {
+    // Verify API key is detected without logging the actual key
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined);
+    console.log(`[App] Gemini API Key detected: ${!!apiKey}`);
+  }, []);
+
+  useEffect(() => {
     if (showSplash) {
       setHasSeenSplash(true);
       const timer = setTimeout(() => {

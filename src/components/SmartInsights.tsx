@@ -41,8 +41,8 @@ export function SmartInsights({ semesters }: SmartInsightsProps) {
 
     setLoading(true);
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) throw new Error("No API key");
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      if (!apiKey) throw new Error("An API Key must be set when running in a browser");
 
       const ai = new GoogleGenAI({ apiKey });
       
