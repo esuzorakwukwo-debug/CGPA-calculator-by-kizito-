@@ -324,7 +324,7 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
                 >
                   <div className="bg-gray-900 dark:bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-2xl text-white">
                     <div className="flex justify-between items-start mb-3">
-                      <div className="flex gap-1.5">
+                      <div className="flex gap-1.5 pt-2">
                         {TOUR_STEPS.map((_, i) => (
                           <div 
                             key={i} 
@@ -334,9 +334,10 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
                       </div>
                       <button 
                         onClick={handleSkip}
-                        className="text-gray-400 hover:text-white transition-colors text-xs font-medium"
+                        className="w-11 h-11 min-w-[44px] min-h-[44px] -mr-2 -mt-2 flex items-center justify-center p-2.5 text-gray-400 hover:text-white rounded-full transition-colors"
+                        title="Close Tour"
                       >
-                        <X size={16} />
+                        <X size={18} />
                       </button>
                     </div>
                     
@@ -347,7 +348,7 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
                     <div className="mt-5 flex items-center justify-between">
                       <button
                         onClick={handleSkip}
-                        className="text-gray-400 hover:text-white transition-colors text-sm font-medium"
+                        className="min-h-[44px] flex items-center text-gray-400 hover:text-white transition-colors text-xs font-semibold px-2 py-2"
                       >
                         Skip Tour
                       </button>
@@ -356,17 +357,18 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
                         {currentStepIndex > 0 && (
                           <button
                             onClick={handleBack}
-                            className="flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-xl text-sm font-medium transition-colors"
+                            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-colors"
+                            title="Previous Step"
                           >
-                            <ChevronLeft size={16} />
+                            <ChevronLeft size={18} />
                           </button>
                         )}
                         {!currentStep.waitForClick && (
                           <button
                             onClick={handleNext}
-                            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+                            className="min-h-[44px] flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-colors"
                           >
-                            {currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}
+                            <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</span>
                             {currentStepIndex !== TOUR_STEPS.length - 1 && <ChevronRight size={16} />}
                           </button>
                         )}

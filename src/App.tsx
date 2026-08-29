@@ -322,14 +322,15 @@ export default function App() {
 
       <div className="min-h-screen flex flex-col bg-gray-50/50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
         <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 shrink-0">
               <GraduationCap size={22} strokeWidth={1.5} />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
-                CGPA Pro <span className="text-sm font-medium text-gray-400 dark:text-gray-500 ml-1">by Kizito</span>
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900 dark:text-white leading-tight flex items-center flex-wrap gap-x-1.5">
+                <span>CGPA Pro</span>
+                <span className="text-xs font-medium text-gray-400 dark:text-gray-500">by Kizito Atelier</span>
               </h1>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-medium tracking-wide">Track. Improve. Graduate Strong.</p>
             </div>
@@ -338,17 +339,17 @@ export default function App() {
             {!isStandalone && (
               <button
                 onClick={handleInstallClick}
-                className="px-2.5 py-1.5 text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200/60 dark:border-indigo-800/40 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm text-xs font-semibold"
+                className="min-h-[44px] min-w-[44px] px-3 py-2.5 text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200/60 dark:border-indigo-800/40 rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow-sm text-xs font-semibold"
                 title="Install CGPA Pro"
               >
-                <Smartphone size={15} />
+                <Smartphone size={16} />
                 <span className="hidden xs:inline sm:inline">Install</span>
               </button>
             )}
 
             <button
               onClick={() => setIsDark(!isDark)}
-              className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] p-2.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors flex items-center justify-center"
               title="Toggle Dark Mode"
               aria-label="Toggle Dark Mode"
             >
@@ -360,7 +361,7 @@ export default function App() {
               <button
                 id="tour-actions-btn"
                 onClick={() => setIsActionsMenuOpen(!isActionsMenuOpen)}
-                className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium border ${
+                className={`min-h-[44px] min-w-[44px] px-3 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs font-medium border ${
                   isActionsMenuOpen
                     ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-transparent hover:border-gray-200 dark:hover:border-gray-700'
@@ -370,7 +371,7 @@ export default function App() {
                 aria-haspopup="true"
               >
                 <MoreVertical size={18} />
-                <span className="hidden sm:inline">Actions</span>
+                <span className="hidden sm:inline font-semibold">Actions</span>
               </button>
 
               <AnimatePresence>
@@ -380,9 +381,9 @@ export default function App() {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -4 }}
                     transition={{ duration: 0.15, ease: 'easeOut' }}
-                    className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 py-1.5 z-50 overflow-hidden"
+                    className="absolute right-0 mt-2 w-60 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 py-2 z-50 overflow-hidden"
                   >
-                    <div className="px-3 py-1.5 text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <div className="px-4 py-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                       Tools & Reports
                     </div>
 
@@ -395,9 +396,9 @@ export default function App() {
                             handleExport();
                           }}
                           disabled={isExporting}
-                          className="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors disabled:opacity-50"
+                          className="w-full text-left min-h-[44px] px-4 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors disabled:opacity-50"
                         >
-                          <FileText size={15} className="text-indigo-600 dark:text-indigo-400" />
+                          <FileText size={16} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
                           <span className="font-medium">
                             {isExporting ? 'Exporting Report...' : 'Full Transcript Report (PDF)'}
                           </span>
@@ -408,9 +409,9 @@ export default function App() {
                             setIsActionsMenuOpen(false);
                             setIsShareModalOpen(true);
                           }}
-                          className="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors"
+                          className="w-full text-left min-h-[44px] px-4 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors"
                         >
-                          <Share2 size={15} className="text-indigo-600 dark:text-indigo-400" />
+                          <Share2 size={16} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
                           <span className="font-medium">Share Snapshot Card</span>
                         </button>
 
@@ -424,9 +425,9 @@ export default function App() {
                         setIsAddingSemester(false);
                         setIsTourActive(true);
                       }}
-                      className="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors"
+                      className="w-full text-left min-h-[44px] px-4 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors"
                     >
-                      <HelpCircle size={15} className="text-gray-500 dark:text-gray-400" />
+                      <HelpCircle size={16} className="text-gray-500 dark:text-gray-400 shrink-0" />
                       <span className="font-medium">Interactive Guide & Tour</span>
                     </button>
 
@@ -435,9 +436,9 @@ export default function App() {
                         setIsActionsMenuOpen(false);
                         setIsAboutModalOpen(true);
                       }}
-                      className="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors"
+                      className="w-full text-left min-h-[44px] px-4 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors"
                     >
-                      <Info size={15} className="text-gray-500 dark:text-gray-400" />
+                      <Info size={16} className="text-gray-500 dark:text-gray-400 shrink-0" />
                       <span className="font-medium">About & Data Protection</span>
                     </button>
 
@@ -449,9 +450,9 @@ export default function App() {
                             setIsActionsMenuOpen(false);
                             setIsResetting(true);
                           }}
-                          className="w-full text-left px-3.5 py-2.5 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition-colors"
+                          className="w-full text-left min-h-[44px] px-4 py-2.5 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition-colors"
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={16} className="shrink-0" />
                           <span className="font-medium">Clear All Semesters</span>
                         </button>
                       </>
@@ -500,10 +501,10 @@ export default function App() {
               <button
                 id="tour-add-semester-btn"
                 onClick={() => setIsAddingSemester(true)}
-                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-md shadow-indigo-500/20"
+                className="min-h-[44px] flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-md shadow-indigo-500/20"
               >
-                <Plus size={16} />
-                Add Semester
+                <Plus size={18} />
+                <span>Add Semester</span>
               </button>
             )}
           </div>
@@ -524,7 +525,7 @@ export default function App() {
                     <select
                       value={newLevel}
                       onChange={(e) => setNewLevel(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm appearance-none text-gray-900 dark:text-white"
+                      className="w-full h-11 px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm appearance-none text-gray-900 dark:text-white"
                     >
                       {LEVELS.map((level) => (
                         <option key={level} value={level}>
@@ -538,7 +539,7 @@ export default function App() {
                     <select
                       value={newTerm}
                       onChange={(e) => setNewTerm(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm appearance-none text-gray-900 dark:text-white"
+                      className="w-full h-11 px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm appearance-none text-gray-900 dark:text-white"
                     >
                       {TERMS.map((term) => (
                         <option key={term} value={term}>
@@ -557,19 +558,19 @@ export default function App() {
                       value={customName}
                       onChange={(e) => setCustomName(e.target.value)}
                       placeholder={`e.g. Year 2 Rain Semester`}
-                      className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white"
+                      className="w-full h-11 px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white"
                     />
                   </div>
                   <div className="flex gap-2 w-full sm:w-auto">
                     <button
                       onClick={handleAddSemester}
-                      className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-md shadow-indigo-500/20"
+                      className="flex-1 sm:flex-none min-h-[44px] bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-md shadow-indigo-500/20 flex items-center justify-center"
                     >
                       Create
                     </button>
                     <button
                       onClick={() => setIsAddingSemester(false)}
-                      className="flex-1 sm:flex-none bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                      className="flex-1 sm:flex-none min-h-[44px] bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-center"
                     >
                       Cancel
                     </button>
@@ -596,7 +597,7 @@ export default function App() {
             </p>
             <button
               onClick={() => setIsAddingSemester(true)}
-              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 relative z-10"
+              className="inline-flex items-center gap-2 min-h-[44px] bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 relative z-10"
             >
               <Plus size={18} />
               Add Your First Semester
@@ -721,24 +722,24 @@ export default function App() {
         }}
       />
 
-      <UpdateNotification />
+      <UpdateNotification enabled={!showSplash && !showPrivacyModal && !isTourActive} />
 
       <footer className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-auto text-center w-full flex flex-col items-center gap-3">
         {semesters.length > 0 && (
           <button
             onClick={() => setIsResetting(true)}
-            className="text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors underline underline-offset-4"
+            className="min-h-[44px] px-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors underline underline-offset-4 flex items-center justify-center"
           >
             Clear All Data
           </button>
         )}
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-sm text-gray-400 dark:text-gray-500">
-            Built by <span className="font-medium text-gray-600 dark:text-gray-300">Kizito Atelier</span>
+        <div className="flex flex-col items-center gap-1.5">
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            Built by <span className="font-semibold text-gray-600 dark:text-gray-300">Kizito Atelier</span>
           </p>
           <button
             onClick={() => setIsAboutModalOpen(true)}
-            className="text-xs text-gray-400/80 dark:text-gray-500/80 font-medium hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+            className="min-h-[44px] px-4 py-2 text-xs text-gray-400/90 dark:text-gray-500/90 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center justify-center"
           >
             Version 1.0.1 (Release & Privacy Info)
           </button>

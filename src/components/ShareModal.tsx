@@ -90,12 +90,13 @@ export function ShareModal({ isOpen, onClose, cgpa, totalCredits, degreeClass }:
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Share2 size={18} className="text-indigo-600 dark:text-indigo-400" /> Share Result
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Share2 size={18} className="text-indigo-600 dark:text-indigo-400" />
+                <span>Share Result</span>
               </h3>
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
               >
                 <X size={20} />
               </button>
@@ -153,14 +154,14 @@ export function ShareModal({ isOpen, onClose, cgpa, totalCredits, degreeClass }:
               <button
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl text-xs font-semibold transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isDownloading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <Download size={18} />
                 )}
-                {isDownloading ? 'Generating Snapshot...' : 'Save Snapshot Card (Image)'}
+                <span>{isDownloading ? 'Generating Snapshot...' : 'Save Snapshot Card (Image)'}</span>
               </button>
             </div>
           </motion.div>

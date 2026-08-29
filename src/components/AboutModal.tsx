@@ -56,7 +56,7 @@ export function AboutModal({ isOpen, onClose, onOpenInstall, isInstalled }: Abou
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Close"
               >
                 <X size={18} />
@@ -64,39 +64,39 @@ export function AboutModal({ isOpen, onClose, onOpenInstall, isInstalled }: Abou
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex border-b border-gray-100 dark:border-gray-800 px-6 bg-white dark:bg-gray-900 shrink-0">
+            <div className="flex border-b border-gray-100 dark:border-gray-800 px-6 bg-white dark:bg-gray-900 shrink-0 overflow-x-auto">
               <button
                 onClick={() => setActiveTab('privacy')}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 text-xs font-medium transition-colors mr-6 ${
+                className={`min-h-[44px] flex items-center gap-2 py-3 px-2 border-b-2 text-xs font-medium transition-colors mr-4 shrink-0 ${
                   activeTab === 'privacy'
-                    ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                <ShieldCheck size={15} />
-                Data Protection
+                <ShieldCheck size={16} />
+                <span>Data Protection</span>
               </button>
               <button
                 onClick={() => setActiveTab('grading')}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 text-xs font-medium transition-colors mr-6 ${
+                className={`min-h-[44px] flex items-center gap-2 py-3 px-2 border-b-2 text-xs font-medium transition-colors mr-4 shrink-0 ${
                   activeTab === 'grading'
-                    ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                <Award size={15} />
-                5.0 Grading System
+                <Award size={16} />
+                <span>5.0 Grading System</span>
               </button>
               <button
                 onClick={() => setActiveTab('release')}
-                className={`flex items-center gap-2 py-3 px-1 border-b-2 text-xs font-medium transition-colors ${
+                className={`min-h-[44px] flex items-center gap-2 py-3 px-2 border-b-2 text-xs font-medium transition-colors shrink-0 ${
                   activeTab === 'release'
-                    ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400'
+                    ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
-                <Info size={15} />
-                About & Release
+                <Info size={16} />
+                <span>About & Release</span>
               </button>
             </div>
 
@@ -254,9 +254,9 @@ export function AboutModal({ isOpen, onClose, onOpenInstall, isInstalled }: Abou
                     onClose();
                     onOpenInstall();
                   }}
-                  className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                  className="min-h-[44px] text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 py-2"
                 >
-                  Install CGPA Pro on this device
+                  <span>Install CGPA Pro on this device</span>
                   <ChevronRight size={14} />
                 </button>
               ) : (
@@ -266,7 +266,7 @@ export function AboutModal({ isOpen, onClose, onOpenInstall, isInstalled }: Abou
               )}
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                className="min-h-[44px] px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-semibold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors flex items-center justify-center"
               >
                 Close
               </button>

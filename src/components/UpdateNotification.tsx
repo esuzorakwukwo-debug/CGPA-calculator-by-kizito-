@@ -1,9 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { motion, AnimatePresence } from 'motion/react';
-import { RefreshCw, X, Sparkles } from 'lucide-react';
+import { RefreshCw, Sparkles, AlertCircle, ArrowRight } from 'lucide-react';
 
-export function UpdateNotification() {
+interface UpdateNotificationProps {
+  /** Optional override to force the Update Required state (e.g. for critical version migrations) */
+  isRequired?: boolean;
+  /** Whether the notification is permitted to be shown (e.g. false during splash/privacy/tour) */
+  enabled?: boolean;
+}
+
+export function UpdateNotification({ isRequired = false, enabled = true }: UpdateNotificationProps) {
+  const [isDismissedForSession, setIsDismissedForSession] = useState(() => {
+    try {
+      return sessionStorage.getItem('cgpa-pro-update-postponed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -35,16 +50,37 @@ export function UpdateNotification() {
   });
 
   const handleUpdate = () => {
+    try {
+      sessionStorage.removeItem('cgpa-pro-update-postponed');
+    } catch {
+      // Ignore storage errors
+    }
+    // Activate the new service worker immediately & reload
     updateServiceWorker(true);
   };
 
   const handleDismiss = () => {
+    // Explicitly preserve the waiting service worker without activating it.
+    // Mark as postponed for this browser session so the student is uninterrupted.
+    try {
+      sessionStorage.setItem('cgpa-pro-update-postponed', 'true');
+    } catch {
+      // Ignore storage errors
+    }
+    setIsDismissedForSession(true);
+    // Hide UI banner while keeping SW in waiting state for next load/session
     setNeedRefresh(false);
   };
 
+  // Determine if notification should show:
+  // - Must be enabled (not during splash, privacy modal, or onboarding tour)
+  // - If isRequired: always shows when needRefresh is true, regardless of session postponement
+  // - If standard: only shows when needRefresh is true AND not postponed in this session
+  const isVisible = enabled && needRefresh && (isRequired || !isDismissedForSession);
+
   return (
     <AnimatePresence>
-      {needRefresh && (
+      {isVisible && (
         <motion.div
           initial={{ opacity: 0, y: 50, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -52,35 +88,63 @@ export function UpdateNotification() {
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="fixed bottom-5 right-5 left-5 sm:left-auto sm:max-w-md z-50 pointer-events-auto"
         >
-          <div className="bg-gray-900/95 dark:bg-gray-800/95 text-white p-4 rounded-2xl shadow-2xl border border-gray-700/60 dark:border-gray-700 backdrop-blur-md flex items-center justify-between gap-4">
+          <div
+            className={`text-white p-4 rounded-2xl shadow-2xl backdrop-blur-md flex items-center justify-between gap-4 border ${
+              isRequired
+                ? 'bg-amber-950/95 dark:bg-amber-950/95 border-amber-500/40 shadow-amber-950/50'
+                : 'bg-gray-900/95 dark:bg-gray-800/95 border-gray-700/60 dark:border-gray-700'
+            }`}
+          >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0">
-                <Sparkles size={20} className="animate-pulse text-indigo-400" />
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                  isRequired
+                    ? 'bg-amber-500/20 border-amber-500/30 text-amber-400'
+                    : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400'
+                }`}
+              >
+                {isRequired ? (
+                  <AlertCircle size={20} className="text-amber-400" />
+                ) : (
+                  <Sparkles size={20} className="animate-pulse text-indigo-400" />
+                )}
               </div>
               <div className="min-w-0">
                 <h4 className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
-                  New Version Available
-                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+                  {isRequired ? 'Update Required' : 'New Version Available'}
+                  <span
+                    className={`inline-block w-2 h-2 rounded-full ${
+                      isRequired ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'
+                    }`}
+                  />
                 </h4>
                 <p className="text-[11px] text-gray-300 dark:text-gray-400 truncate">
-                  Update now for the latest features & improvements.
+                  {isRequired
+                    ? 'Critical performance & academic accuracy update.'
+                    : 'Update now for the latest features & improvements.'}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleDismiss}
-                className="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                Later
-              </button>
+              {!isRequired && (
+                <button
+                  onClick={handleDismiss}
+                  className="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-gray-800/80 rounded-lg transition-colors"
+                >
+                  Later
+                </button>
+              )}
               <button
                 onClick={handleUpdate}
-                className="px-3.5 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors flex items-center gap-1.5 shadow-md shadow-indigo-600/30 active:scale-95"
+                className={`px-3.5 py-1.5 text-xs font-semibold text-white rounded-lg transition-colors flex items-center gap-1.5 shadow-md active:scale-95 ${
+                  isRequired
+                    ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/30'
+                    : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30'
+                }`}
               >
                 <RefreshCw size={12} className="animate-spin" style={{ animationDuration: '3s' }} />
-                Update now
+                <span>{isRequired ? 'Reload' : 'Update now'}</span>
               </button>
             </div>
           </div>
@@ -89,3 +153,4 @@ export function UpdateNotification() {
     </AnimatePresence>
   );
 }
+

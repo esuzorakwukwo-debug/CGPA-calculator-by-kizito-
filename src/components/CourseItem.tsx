@@ -37,37 +37,37 @@ export function CourseItem({ course, onUpdate, onDelete }: CourseItemProps) {
       <div className="flex-1 min-w-0 pr-4">
         <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{course.title}</h4>
         <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
             {course.creditUnit} {course.creditUnit === 1 ? 'Unit' : 'Units'}
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
             Grade: {course.grade} ({gradePoint} pts)
           </span>
         </div>
       </div>
       
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <div className="text-right hidden sm:block">
           <div className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">{totalPoints}</div>
-          <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total Pts</div>
+          <div className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total Pts</div>
         </div>
         
         <div className="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => setIsEditing(true)}
-            className="p-1.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-md transition-colors"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-xl transition-colors"
             title="Edit Course"
           >
-            <Edit2 size={14} />
+            <Edit2 size={16} />
           </button>
           <button
             onClick={() => onDelete(course.id)}
-            className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
             title="Delete Course"
           >
-            <Trash2 size={14} />
+            <Trash2 size={16} />
           </button>
         </div>
       </div>

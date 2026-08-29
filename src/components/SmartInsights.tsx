@@ -103,7 +103,7 @@ Do not use markdown formatting, just plain text.`;
           {loading ? <Loader2 size={20} className="animate-spin" /> : (isDeepThinking ? <BrainCircuit size={20} /> : <Sparkles size={20} />)}
         </div>
         <div className="flex-1 w-full">
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
             <h4 className="text-sm font-semibold text-violet-900 dark:text-violet-200">
               {isDeepThinking ? "Deep Academic Analysis" : "Smart Insight"}
             </h4>
@@ -113,10 +113,10 @@ Do not use markdown formatting, just plain text.`;
                   setIsDeepThinking(true);
                   fetchInsight(true);
                 }}
-                className="flex items-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 bg-violet-100/50 dark:bg-violet-900/30 hover:bg-violet-200/50 dark:hover:bg-violet-800/40 px-2.5 py-1.5 rounded-lg transition-colors"
+                className="min-h-[44px] flex items-center justify-center gap-1.5 text-xs font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 bg-violet-100/60 dark:bg-violet-900/40 hover:bg-violet-200/60 dark:hover:bg-violet-800/50 px-3.5 py-2 rounded-xl transition-colors shadow-xs"
               >
-                <BrainCircuit size={14} />
-                Think Deeper
+                <BrainCircuit size={16} />
+                <span>Think Deeper</span>
               </button>
             )}
           </div>

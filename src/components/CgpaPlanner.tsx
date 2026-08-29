@@ -158,12 +158,12 @@ export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
       <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
       
       <div className="flex items-center gap-3 mb-6 relative z-10">
-        <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center shadow-inner">
+        <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center shadow-inner shrink-0">
           <Target size={20} />
         </div>
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">CGPA Planner</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Plan your academic performance</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Plan your academic performance</p>
         </div>
       </div>
 
@@ -171,13 +171,13 @@ export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
         {/* Left Column: Inputs */}
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Total Program Duration
             </label>
             <select
               value={durationOption}
               onChange={(e) => setDurationOption(e.target.value)}
-              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white appearance-none"
+              className="w-full h-11 px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white appearance-none"
             >
               <option value="8">4 years (8 semesters)</option>
               <option value="10">5 years (10 semesters)</option>
@@ -192,7 +192,7 @@ export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
               animate={{ opacity: 1, height: 'auto' }}
               className="overflow-hidden"
             >
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Total Semesters
               </label>
               <input
@@ -201,14 +201,14 @@ export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
                 max="20"
                 value={manualSemesters}
                 onChange={(e) => setManualSemesters(e.target.value)}
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white"
+                className="w-full h-11 px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white"
                 placeholder="e.g., 8"
               />
             </motion.div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center justify-between">
               <span>Target CGPA</span>
               <span className="text-xs text-gray-400 font-normal">Optional</span>
             </label>
@@ -219,20 +219,20 @@ export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
               step="0.01"
               value={targetCgpaInput}
               onChange={(e) => setTargetCgpaInput(e.target.value)}
-              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white"
+              className="w-full h-11 px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white"
               placeholder="e.g., 4.50"
             />
-            <p className="text-xs text-gray-500 mt-1.5">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
               Leave blank to see how to maximize your final CGPA.
             </p>
           </div>
 
           <button
             onClick={handleCalculate}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30"
+            className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30"
           >
             <Calculator size={18} />
-            Calculate Plan
+            <span>Calculate Plan</span>
           </button>
         </div>
 

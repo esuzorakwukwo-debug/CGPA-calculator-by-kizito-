@@ -88,16 +88,16 @@ export function ConfirmModal({
                       value={verificationInput}
                       onChange={(e) => setVerificationInput(e.target.value)}
                       placeholder={`Type ${requireVerificationText}`}
-                      className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all font-mono uppercase"
+                      className="w-full h-11 px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all font-mono uppercase"
                       autoFocus
                     />
                   </div>
                 )}
 
-                <div className="flex gap-3 justify-end mt-2">
+                <div className="flex gap-3 justify-end mt-4">
                   <button
                     onClick={onCancel}
-                    className="px-4 py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
                   >
                     {cancelText}
                   </button>
@@ -109,7 +109,7 @@ export function ConfirmModal({
                         onCancel();
                       }
                     }}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    className={`min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center ${
                       isConfirmDisabled
                         ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
                         : 'text-white bg-red-600 hover:bg-red-700 shadow-sm shadow-red-500/20'

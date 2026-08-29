@@ -50,7 +50,7 @@ export function CourseForm({ onAdd, onCancel, initialData, isEdit }: CourseFormP
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 items-start bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700/50 transition-colors">
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 items-start bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700/50 transition-colors">
       <div className="flex-1 w-full">
         <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Course Title</label>
         <input
@@ -62,14 +62,14 @@ export function CourseForm({ onAdd, onCancel, initialData, isEdit }: CourseFormP
             if (titleError) setTitleError(null);
           }}
           placeholder="e.g. MTH 101"
-          className={`w-full px-3 py-2 bg-white dark:bg-gray-900 border ${titleError ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500' : 'border-gray-200 dark:border-gray-700 focus:ring-indigo-500/50 focus:border-indigo-500'} rounded-lg focus:outline-none focus:ring-2 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500`}
+          className={`w-full h-11 px-3 py-2.5 bg-white dark:bg-gray-900 border ${titleError ? 'border-red-500 focus:ring-red-500/50 focus:border-red-500' : 'border-gray-200 dark:border-gray-700 focus:ring-indigo-500/50 focus:border-indigo-500'} rounded-xl focus:outline-none focus:ring-2 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500`}
           required
         />
         {titleError && (
           <p className="text-xs text-red-500 mt-1.5 font-medium">{titleError}</p>
         )}
       </div>
-      <div className="w-full sm:w-24">
+      <div className="w-full sm:w-28">
         <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Credits</label>
         <input
           type="number"
@@ -78,16 +78,16 @@ export function CourseForm({ onAdd, onCancel, initialData, isEdit }: CourseFormP
           value={creditUnit}
           onChange={(e) => setCreditUnit(e.target.value)}
           placeholder="Units"
-          className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+          className="w-full h-11 px-3 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
           required
         />
       </div>
-      <div className="w-full sm:w-24">
+      <div className="w-full sm:w-28">
         <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Grade</label>
         <select
           value={grade}
           onChange={(e) => setGrade(e.target.value as Grade)}
-          className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm appearance-none text-gray-900 dark:text-white"
+          className="w-full h-11 px-3 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm appearance-none text-gray-900 dark:text-white"
           required
         >
           <option value="" disabled>Select</option>
@@ -101,21 +101,21 @@ export function CourseForm({ onAdd, onCancel, initialData, isEdit }: CourseFormP
       </div>
       <div className="flex flex-col w-full sm:w-auto mt-2 sm:mt-0">
         <label className="hidden sm:block text-xs mb-1">&nbsp;</label>
-        <div className="flex gap-2 h-[38px]">
+        <div className="flex gap-2 h-11">
           <button
             type="submit"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm h-full"
+            className="flex-1 sm:flex-none min-h-[44px] flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm"
           >
-            {isEdit ? <Check size={16} /> : <Plus size={16} />}
-            {isEdit ? 'Save' : 'Add'}
+            {isEdit ? <Check size={18} /> : <Plus size={18} />}
+            <span>{isEdit ? 'Save' : 'Add'}</span>
           </button>
           {isEdit && onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="flex items-center justify-center px-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors h-full"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl transition-colors"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           )}
         </div>

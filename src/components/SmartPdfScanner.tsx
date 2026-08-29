@@ -198,7 +198,7 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
     <>
       <button
         onClick={() => fileInputRef.current?.click()}
-        className="flex items-center gap-2 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm"
+        className="min-h-[44px] flex items-center justify-center gap-2 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm"
       >
         <Sparkles size={16} className="text-indigo-500" />
         <span className="hidden sm:inline">Scan Result PDF</span>
@@ -237,13 +237,13 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Smart PDF Scanner</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Extract courses automatically</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Extract courses automatically</p>
                   </div>
                 </div>
                 {!isProcessing && (
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
                   >
                     <X size={20} />
                   </button>
@@ -259,7 +259,7 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
                       <div className="absolute inset-0 border-4 border-indigo-600 dark:border-indigo-500 rounded-full border-t-transparent animate-spin" />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Processing Document</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">{progressMessage}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 animate-pulse">{progressMessage}</p>
                   </div>
                 ) : error ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -267,10 +267,10 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
                       <AlertCircle size={32} />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Extraction Failed</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">{error}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm">{error}</p>
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="mt-6 px-6 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-xl font-medium transition-colors"
+                      className="mt-6 min-h-[44px] px-6 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center"
                     >
                       Close
                     </button>
@@ -280,8 +280,8 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
                     <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4 flex items-start gap-3">
                       <CheckCircle2 className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" size={20} />
                       <div>
-                        <h4 className="text-sm font-medium text-emerald-900 dark:text-emerald-300">Extraction Successful</h4>
-                        <p className="text-sm text-emerald-700 dark:text-emerald-400/80 mt-1">
+                        <h4 className="text-xs font-semibold text-emerald-900 dark:text-emerald-300">Extraction Successful</h4>
+                        <p className="text-xs text-emerald-700 dark:text-emerald-400/80 mt-1">
                           We found {previewData.length} semesters and {previewData.reduce((acc, sem) => acc + sem.courses.length, 0)} courses. Please review and edit if necessary before saving.
                         </p>
                       </div>
@@ -289,7 +289,7 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
 
                     <div className="bg-indigo-50/70 dark:bg-indigo-500/10 border border-indigo-200/80 dark:border-indigo-500/20 rounded-xl p-3.5 flex items-start gap-3">
                       <ShieldCheck className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" size={18} />
-                      <div className="text-xs text-indigo-950 dark:text-indigo-200">
+                      <div className="text-xs text-indigo-950 dark:text-indigo-200 leading-relaxed">
                         <span className="font-semibold block mb-0.5">Non-Destructive Safe Merge</span>
                         Courses matching an existing semester (e.g. 100L 1st Semester) will be <strong>safely merged</strong> with your existing records without overwriting or deleting previous courses. Any new semesters will be added as new records.
                       </div>
@@ -299,50 +299,51 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
                       {previewData.map((semester) => (
                         <div key={semester.id} className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                           <div className="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                            <h3 className="font-medium text-gray-900 dark:text-white">{semester.name}</h3>
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{semester.name}</h3>
                             <span className="text-xs font-medium px-2.5 py-1 bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
                               {semester.courses.length} courses
                             </span>
                           </div>
                           <div className="divide-y divide-gray-100 dark:divide-gray-800">
                             {semester.courses.map((course) => (
-                              <div key={course.id} className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                              <div key={course.id} className="p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                                 <div className="flex-1 w-full">
-                                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Course Code</label>
+                                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Course Code</label>
                                   <input
                                     type="text"
                                     value={course.title}
                                     onChange={(e) => handleCourseChange(semester.id, course.id, 'title', e.target.value)}
-                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/50"
+                                    className="w-full h-11 px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/50"
                                   />
                                 </div>
                                 <div className="w-full sm:w-24">
-                                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Units</label>
+                                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Units</label>
                                   <input
                                     type="number"
                                     min="1"
                                     max="6"
                                     value={course.creditUnit}
                                     onChange={(e) => handleCourseChange(semester.id, course.id, 'creditUnit', Number(e.target.value))}
-                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/50"
+                                    className="w-full h-11 px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/50"
                                   />
                                 </div>
-                                <div className="w-full sm:w-24">
-                                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Grade</label>
+                                <div className="w-full sm:w-28">
+                                  <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Grade</label>
                                   <select
                                     value={course.grade}
                                     onChange={(e) => handleCourseChange(semester.id, course.id, 'grade', e.target.value as Grade)}
-                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/50"
+                                    className="w-full h-11 px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/50"
                                   >
                                     {['A', 'B', 'C', 'D', 'E', 'F'].map(g => (
                                       <option key={g} value={g}>{g}</option>
                                     ))}
                                   </select>
                                 </div>
-                                <div className="pt-5">
+                                <div className="pt-0 sm:pt-6">
                                   <button
                                     onClick={() => handleRemoveCourse(semester.id, course.id)}
-                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                                    className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
+                                    title="Remove Course"
                                   >
                                     <Trash2 size={18} />
                                   </button>
@@ -362,13 +363,13 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
                 <div className="p-4 sm:p-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3">
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                    className="min-h-[44px] px-5 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors flex items-center justify-center"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleConfirm}
-                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors shadow-md shadow-indigo-500/20"
+                    className="min-h-[44px] px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-md shadow-indigo-500/20 flex items-center justify-center"
                   >
                     Save & Merge with Planner
                   </button>

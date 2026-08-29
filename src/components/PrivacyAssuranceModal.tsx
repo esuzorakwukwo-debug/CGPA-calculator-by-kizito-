@@ -103,13 +103,13 @@ export function PrivacyAssuranceModal({ isOpen, onConfirm }: PrivacyAssuranceMod
 
             {/* Acknowledgment Action */}
             <div className="p-5 border-t border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
-                <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
                 <span>Acknowledged once upon first launch</span>
               </div>
               <button
                 onClick={onConfirm}
-                className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-indigo-500/25 flex items-center justify-center gap-2 active:scale-95"
+                className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-indigo-500/25 flex items-center justify-center gap-2 active:scale-95"
               >
                 <span>I Understand — Continue</span>
                 <ArrowRight size={14} />

@@ -48,7 +48,7 @@ export function InstallModal({
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Close"
               >
                 <X size={18} />
@@ -68,10 +68,10 @@ export function InstallModal({
                     }
                     onClose();
                   }}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors shadow-md shadow-indigo-500/20"
+                  className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-xs transition-colors shadow-md shadow-indigo-500/20"
                 >
                   <Download size={16} />
-                  Install Now
+                  <span>Install Now</span>
                 </button>
               </div>
             ) : isIOS ? (
@@ -82,7 +82,7 @@ export function InstallModal({
 
                 <div className="space-y-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-800 text-xs">
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-[11px]">
+                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">
                       1
                     </div>
                     <div>
@@ -94,7 +94,7 @@ export function InstallModal({
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-[11px]">
+                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">
                       2
                     </div>
                     <div>
@@ -106,7 +106,7 @@ export function InstallModal({
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-[11px]">
+                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold shrink-0 text-xs">
                       3
                     </div>
                     <div>
@@ -121,7 +121,7 @@ export function InstallModal({
                 <div className="flex justify-end">
                   <button
                     onClick={onClose}
-                    className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                    className="min-h-[44px] px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-semibold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors flex items-center justify-center"
                   >
                     Got It
                   </button>
@@ -135,7 +135,7 @@ export function InstallModal({
                 <div className="flex justify-end">
                   <button
                     onClick={onClose}
-                    className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-medium rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                    className="min-h-[44px] px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-semibold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors flex items-center justify-center"
                   >
                     Close
                   </button>

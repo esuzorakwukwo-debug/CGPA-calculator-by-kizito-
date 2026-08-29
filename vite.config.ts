@@ -17,7 +17,7 @@ export default defineConfig(({mode}) => {
         manifest: {
           name: 'CGPA Pro by Kizito',
           short_name: 'CGPA Pro',
-          description: 'A CGPA Calculator and Planner',
+          description: 'A premium CGPA calculator for Nigerian university students using a 5.0 scale. Track. Improve. Graduate Strong.',
           theme_color: '#7c3aed',
           background_color: '#0f172a',
           display: 'standalone',
@@ -31,12 +31,14 @@ export default defineConfig(({mode}) => {
             {
               src: '/icon-192.png',
               sizes: '192x192',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
             },
             {
               src: '/icon-512.png',
               sizes: '512x512',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
             }
           ]
         },

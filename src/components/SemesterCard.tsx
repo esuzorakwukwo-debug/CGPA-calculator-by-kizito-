@@ -161,18 +161,18 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(semester.id);
               }}
-              className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] p-2.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors flex items-center justify-center"
               title="Delete Semester"
             >
               <Trash2 size={18} />
             </button>
-            <div className="p-2 text-gray-400 dark:text-gray-500">
+            <div className="w-11 h-11 min-w-[44px] min-h-[44px] p-2.5 text-gray-400 dark:text-gray-500 flex items-center justify-center">
               {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </div>
           </div>
@@ -240,9 +240,9 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                       </label>
                       <button 
                         onClick={() => { setIsBulkAdding(false); setBulkError(null); }}
-                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl transition-colors"
                       >
-                        <X size={16} />
+                        <X size={18} />
                       </button>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
@@ -255,11 +255,11 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                         if (bulkError) setBulkError(null);
                       }}
                       placeholder="MLS 411, 3, A&#10;MTH 101, 4, B"
-                      className="w-full h-32 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none mb-3"
+                      className="w-full h-32 px-3 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none mb-3"
                     />
                     {/* Live Preview / Status of Parsed Courses */}
                     {bulkText.trim() && (
-                      <div className="mb-3 p-2.5 rounded-lg text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/80 space-y-1">
+                      <div className="mb-3 p-3 rounded-xl text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/80 space-y-1">
                         <div className="flex items-center justify-between font-medium">
                           <span className={previewBulkCourses.length > 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-gray-500"}>
                             {previewBulkCourses.length > 0 
@@ -267,7 +267,7 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                               : 'No valid courses detected yet'}
                           </span>
                           {previewBulkInvalid > 0 && (
-                            <span className="text-amber-600 dark:text-amber-400 text-[11px]">
+                            <span className="text-amber-600 dark:text-amber-400 text-xs">
                               {previewBulkInvalid} invalid {previewBulkInvalid === 1 ? 'line' : 'lines'}
                             </span>
                           )}
@@ -276,7 +276,7 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                     )}
 
                     {bulkError && (
-                      <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-xs rounded-lg border border-amber-200 dark:border-amber-800/30">
+                      <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-xs rounded-xl border border-amber-200 dark:border-amber-800/30">
                         {bulkError}
                       </div>
                     )}
@@ -284,13 +284,13 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                       <button
                         onClick={handleBulkAdd}
                         disabled={previewBulkCourses.length === 0}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm ${
+                        className={`flex-1 min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm ${
                           previewBulkCourses.length > 0
                             ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                             : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                         }`}
                       >
-                        <Check size={16} />
+                        <Check size={18} />
                         {previewBulkCourses.length > 0
                           ? `Import ${previewBulkCourses.length} ${previewBulkCourses.length === 1 ? 'Course' : 'Courses'} (${previewBulkUnits} Units)`
                           : 'Import Courses'}
@@ -304,7 +304,7 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                     <button
                       id={isFirst ? "tour-single-add" : undefined}
                       onClick={() => setIsAddingCourse(true)}
-                      className="flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-xl transition-colors border border-indigo-100 dark:border-indigo-500/20 border-dashed"
+                      className="flex-1 min-h-[44px] py-3 px-4 flex items-center justify-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-xl transition-colors border border-indigo-100 dark:border-indigo-500/20 border-dashed"
                     >
                       <PlusCircle size={18} />
                       Add Course
@@ -312,7 +312,7 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                     <button
                       id={isFirst ? "tour-bulk-add" : undefined}
                       onClick={() => setIsBulkAdding(true)}
-                      className="flex-1 py-3 flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-xl transition-colors border border-emerald-100 dark:border-emerald-500/20 border-dashed"
+                      className="flex-1 min-h-[44px] py-3 px-4 flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-xl transition-colors border border-emerald-100 dark:border-emerald-500/20 border-dashed"
                     >
                       <ListPlus size={18} />
                       Bulk Add

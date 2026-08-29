@@ -36,14 +36,14 @@ export function LimitModal({ isOpen, onClose }: LimitModalProps) {
               </p>
               <button
                 onClick={onClose}
-                className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium py-3 rounded-xl transition-colors"
+                className="w-full min-h-[44px] bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium py-3 px-6 rounded-xl transition-colors text-xs font-semibold flex items-center justify-center"
               >
                 Got it
               </button>
             </div>
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="absolute top-4 right-4 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full transition-colors"
             >
               <X size={20} />
             </button>
