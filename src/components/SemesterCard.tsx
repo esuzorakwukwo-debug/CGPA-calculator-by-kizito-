@@ -62,41 +62,56 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
     }
   };
 
-  const handleBulkAdd = () => {
-    if (!bulkText.trim()) {
-      setIsBulkAdding(false);
-      return;
-    }
+  const courseBeingDeleted = semester.courses.find((c) => c.id === courseToDelete);
 
-    const lines = bulkText.split('\n');
-    const newCourses: Course[] = [];
-    let errorCount = 0;
+  // Helper to parse live bulk text for live preview
+  const parseBulkContent = (text: string) => {
+    const lines = text.split('\n');
+    const valid: Course[] = [];
+    let invalidCount = 0;
 
     for (const line of lines) {
       if (!line.trim()) continue;
-      
-      const parts = line.split(',').map(p => p.trim());
+      const parts = line.split(',').map((p) => p.trim());
       if (parts.length !== 3) {
-        errorCount++;
+        invalidCount++;
         continue;
       }
-
       const [title, unitsStr, gradeStr] = parts;
       const creditUnit = parseInt(unitsStr, 10);
       const grade = gradeStr.toUpperCase();
 
-      if (!title || isNaN(creditUnit) || creditUnit <= 0 || !['A', 'B', 'C', 'D', 'E', 'F'].includes(grade)) {
-        errorCount++;
+      if (
+        !title ||
+        isNaN(creditUnit) ||
+        creditUnit <= 0 ||
+        !['A', 'B', 'C', 'D', 'E', 'F'].includes(grade)
+      ) {
+        invalidCount++;
         continue;
       }
 
-      newCourses.push({
+      valid.push({
         id: crypto.randomUUID(),
         title,
         creditUnit,
         grade: grade as any,
       });
     }
+
+    return { valid, invalidCount };
+  };
+
+  const { valid: previewBulkCourses, invalidCount: previewBulkInvalid } = parseBulkContent(bulkText);
+  const previewBulkUnits = previewBulkCourses.reduce((sum, c) => sum + c.creditUnit, 0);
+
+  const handleBulkAdd = () => {
+    if (!bulkText.trim()) {
+      setIsBulkAdding(false);
+      return;
+    }
+
+    const { valid: newCourses, invalidCount: errorCount } = parseBulkContent(bulkText);
 
     if (newCourses.length > 0) {
       onUpdate(semester.id, {
@@ -242,6 +257,24 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                       placeholder="MLS 411, 3, A&#10;MTH 101, 4, B"
                       className="w-full h-32 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none mb-3"
                     />
+                    {/* Live Preview / Status of Parsed Courses */}
+                    {bulkText.trim() && (
+                      <div className="mb-3 p-2.5 rounded-lg text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/80 space-y-1">
+                        <div className="flex items-center justify-between font-medium">
+                          <span className={previewBulkCourses.length > 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-gray-500"}>
+                            {previewBulkCourses.length > 0 
+                              ? `✓ ${previewBulkCourses.length} ${previewBulkCourses.length === 1 ? 'course' : 'courses'} ready to add (${previewBulkUnits} total units)` 
+                              : 'No valid courses detected yet'}
+                          </span>
+                          {previewBulkInvalid > 0 && (
+                            <span className="text-amber-600 dark:text-amber-400 text-[11px]">
+                              {previewBulkInvalid} invalid {previewBulkInvalid === 1 ? 'line' : 'lines'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {bulkError && (
                       <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-xs rounded-lg border border-amber-200 dark:border-amber-800/30">
                         {bulkError}
@@ -250,10 +283,17 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                     <div className="flex gap-2">
                       <button
                         onClick={handleBulkAdd}
-                        className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                        disabled={previewBulkCourses.length === 0}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm ${
+                          previewBulkCourses.length > 0
+                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        }`}
                       >
                         <Check size={16} />
-                        Import Courses
+                        {previewBulkCourses.length > 0
+                          ? `Import ${previewBulkCourses.length} ${previewBulkCourses.length === 1 ? 'Course' : 'Courses'} (${previewBulkUnits} Units)`
+                          : 'Import Courses'}
                       </button>
                     </div>
                   </motion.div>
@@ -288,8 +328,17 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
       <ConfirmModal
         isOpen={courseToDelete !== null}
         title="Delete Course"
-        message="Are you sure you want to delete this course? This action cannot be undone."
-        confirmText="Delete"
+        message="Are you sure you want to delete this course? Your semester GPA and overall CGPA will be recalculated."
+        confirmText="Delete Course"
+        details={
+          courseBeingDeleted
+            ? [
+                { label: 'Course Code / Title', value: courseBeingDeleted.title },
+                { label: 'Credit Units', value: `${courseBeingDeleted.creditUnit} ${courseBeingDeleted.creditUnit === 1 ? 'Unit' : 'Units'}` },
+                { label: 'Recorded Grade', value: `Grade ${courseBeingDeleted.grade}` },
+              ]
+            : undefined
+        }
         onConfirm={handleDeleteCourse}
         onCancel={() => setCourseToDelete(null)}
       />

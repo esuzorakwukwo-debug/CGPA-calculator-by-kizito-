@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { FileText, AlertCircle, X, CheckCircle2, Sparkles, Trash2 } from 'lucide-react';
+import { FileText, AlertCircle, X, CheckCircle2, Sparkles, Trash2, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { GoogleGenAI, Type } from '@google/genai';
@@ -287,6 +287,14 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
                       </div>
                     </div>
 
+                    <div className="bg-indigo-50/70 dark:bg-indigo-500/10 border border-indigo-200/80 dark:border-indigo-500/20 rounded-xl p-3.5 flex items-start gap-3">
+                      <ShieldCheck className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" size={18} />
+                      <div className="text-xs text-indigo-950 dark:text-indigo-200">
+                        <span className="font-semibold block mb-0.5">Non-Destructive Safe Merge</span>
+                        Courses matching an existing semester (e.g. 100L 1st Semester) will be <strong>safely merged</strong> with your existing records without overwriting or deleting previous courses. Any new semesters will be added as new records.
+                      </div>
+                    </div>
+
                     <div className="space-y-6">
                       {previewData.map((semester) => (
                         <div key={semester.id} className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
@@ -362,7 +370,7 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
                     onClick={handleConfirm}
                     className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors shadow-md shadow-indigo-500/20"
                   >
-                    Save & Calculate CGPA
+                    Save & Merge with Planner
                   </button>
                 </div>
               )}

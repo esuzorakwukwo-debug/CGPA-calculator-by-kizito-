@@ -160,7 +160,7 @@ export function ShareModal({ isOpen, onClose, cgpa, totalCredits, degreeClass }:
                 ) : (
                   <Download size={18} />
                 )}
-                {isDownloading ? 'Generating Image...' : 'Share / Download as Image'}
+                {isDownloading ? 'Generating Snapshot...' : 'Save Snapshot Card (Image)'}
               </button>
             </div>
           </motion.div>

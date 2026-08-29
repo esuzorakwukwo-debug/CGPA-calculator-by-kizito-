@@ -1,5 +1,4 @@
 import { motion } from 'motion/react';
-import { GraduationCap } from 'lucide-react';
 
 export function SplashScreen() {
   return (
@@ -15,8 +14,13 @@ export function SplashScreen() {
         transition={{ duration: 0.7, ease: "easeOut" }}
         className="flex flex-col items-center px-6 text-center"
       >
-        <div className="w-24 h-24 mb-8 rounded-3xl bg-indigo-600/20 flex items-center justify-center text-indigo-500 shadow-[0_0_40px_rgba(79,70,229,0.2)]">
-          <GraduationCap size={56} strokeWidth={1.5} />
+        <div className="w-24 h-24 mb-8 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(124,58,237,0.35)]">
+          <img
+            src="/icon-512.png"
+            alt="CGPA Pro"
+            className="w-full h-full object-cover select-none"
+            referrerPolicy="no-referrer"
+          />
         </div>
         <p className="text-slate-300 italic font-serif text-lg md:text-xl max-w-md leading-relaxed">
           "A scholar who cherishes the love of comfort<br className="hidden sm:block" /> is not worthy to be deemed a scholar."

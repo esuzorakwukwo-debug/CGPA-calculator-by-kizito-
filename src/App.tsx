@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Plus, Trash2, GraduationCap, Sun, Moon, Sparkles, Download, Share2, HelpCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Trash2, GraduationCap, Sun, Moon, Sparkles, Download, Share2, HelpCircle, Info, Smartphone, MoreVertical, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { Semester } from './types';
@@ -14,6 +14,10 @@ import { ShareModal } from './components/ShareModal';
 import { SplashScreen } from './components/SplashScreen';
 import { OnboardingTour } from './components/OnboardingTour';
 import { SmartPdfScanner } from './components/SmartPdfScanner';
+import { AboutModal } from './components/AboutModal';
+import { InstallModal } from './components/InstallModal';
+import { PrivacyAssuranceModal } from './components/PrivacyAssuranceModal';
+import { UpdateNotification } from './components/UpdateNotification';
 import { calculateCGPA, getDegreeClass } from './utils';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -45,10 +49,78 @@ export default function App() {
   const [isResetting, setIsResetting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   const [hasSeenSplash, setHasSeenSplash] = useLocalStorage('cgpa-pro-splash-seen', false);
+  const [hasAcknowledgedPrivacy, setHasAcknowledgedPrivacy] = useLocalStorage('cgpa-pro-privacy-acknowledged', false);
   const [hasSeenTour, setHasSeenTour] = useLocalStorage('cgpa-pro-tour-seen', false);
   const [isTourActive, setIsTourActive] = useState(false);
   const [showSplash, setShowSplash] = useState(() => !hasSeenSplash);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+  const actionsMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close actions dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+        setIsActionsMenuOpen(false);
+      }
+    };
+    if (isActionsMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isActionsMenuOpen]);
+
+  // Check standalone mode, iOS platform, and capture beforeinstallprompt
+  useEffect(() => {
+    const checkStandalone = () => {
+      const isStandaloneMode =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true;
+      setIsStandalone(isStandaloneMode);
+    };
+    checkStandalone();
+
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isApple = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isApple);
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', () => {
+      setIsStandalone(true);
+      setDeferredPrompt(null);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult && choiceResult.outcome === 'accepted') {
+          setIsStandalone(true);
+        }
+        setDeferredPrompt(null);
+      });
+    } else {
+      setIsInstallModalOpen(true);
+    }
+  };
 
   // Use dummy data if tour is active and no real data exists
   const displaySemesters = isTourActive && semesters.length === 0 ? DUMMY_SEMESTERS : semesters;
@@ -59,11 +131,29 @@ export default function App() {
   );
   const degreeClass = getDegreeClass(cgpa).label;
 
+  const semesterBeingDeleted = semesters.find((s) => s.id === semesterToDelete);
+  const semesterDeletedCredits = semesterBeingDeleted
+    ? semesterBeingDeleted.courses.reduce((sum, c) => sum + c.creditUnit, 0)
+    : 0;
+
   useEffect(() => {
-    if (!showSplash && !hasSeenTour) {
+    // On first launch, once splash completes, show privacy assurance if not yet acknowledged
+    if (!showSplash) {
+      if (!hasAcknowledgedPrivacy) {
+        setShowPrivacyModal(true);
+      } else if (!hasSeenTour) {
+        setIsTourActive(true);
+      }
+    }
+  }, [showSplash, hasAcknowledgedPrivacy, hasSeenTour]);
+
+  const handleConfirmPrivacy = () => {
+    setHasAcknowledgedPrivacy(true);
+    setShowPrivacyModal(false);
+    if (!hasSeenTour) {
       setIsTourActive(true);
     }
-  }, [showSplash, hasSeenTour]);
+  };
 
   useEffect(() => {
     if (isDark) {
@@ -244,56 +334,132 @@ export default function App() {
               <p className="text-xs text-gray-500 dark:text-gray-400 font-medium tracking-wide">Track. Improve. Graduate Strong.</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button
-              onClick={() => {
-                setIsAddingSemester(false);
-                setIsTourActive(true);
-              }}
-              className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-1.5"
-              title="Help & Guide"
-            >
-              <HelpCircle size={18} />
-              <span className="hidden sm:inline text-sm font-medium">Guide</span>
-            </button>
-            {displaySemesters.length > 0 && (
-              <>
-                <button
-                  onClick={() => setIsShareModalOpen(true)}
-                  className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors flex items-center gap-1.5"
-                  title="Share Result"
-                >
-                  <Share2 size={18} />
-                  <span className="hidden sm:inline text-sm font-medium">Share</span>
-                </button>
-                <button
-                  id="tour-export-btn"
-                  onClick={handleExport}
-                  disabled={isExporting}
-                  className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
-                  title="Export as PDF"
-                >
-                  <Download size={18} />
-                  <span className="hidden sm:inline text-sm font-medium">{isExporting ? 'Exporting...' : 'Export'}</span>
-                </button>
-              </>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {!isStandalone && (
+              <button
+                onClick={handleInstallClick}
+                className="px-2.5 py-1.5 text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200/60 dark:border-indigo-800/40 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm text-xs font-semibold"
+                title="Install CGPA Pro"
+              >
+                <Smartphone size={15} />
+                <span className="hidden xs:inline sm:inline">Install</span>
+              </button>
             )}
+
             <button
               onClick={() => setIsDark(!isDark)}
               className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               title="Toggle Dark Mode"
+              aria-label="Toggle Dark Mode"
             >
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            {displaySemesters.length > 0 && (
+
+            {/* Consolidated Actions Dropdown Menu */}
+            <div className="relative" ref={actionsMenuRef}>
               <button
-                onClick={() => setIsResetting(true)}
-                className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-1.5 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                id="tour-actions-btn"
+                onClick={() => setIsActionsMenuOpen(!isActionsMenuOpen)}
+                className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium border ${
+                  isActionsMenuOpen
+                    ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-transparent hover:border-gray-200 dark:hover:border-gray-700'
+                }`}
+                title="Actions & Options"
+                aria-expanded={isActionsMenuOpen}
+                aria-haspopup="true"
               >
-                <Trash2 size={16} />
-                <span className="hidden sm:inline">Reset All</span>
+                <MoreVertical size={18} />
+                <span className="hidden sm:inline">Actions</span>
               </button>
-            )}
+
+              <AnimatePresence>
+                {isActionsMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                    className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 py-1.5 z-50 overflow-hidden"
+                  >
+                    <div className="px-3 py-1.5 text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                      Tools & Reports
+                    </div>
+
+                    {displaySemesters.length > 0 && (
+                      <>
+                        <button
+                          id="tour-export-btn"
+                          onClick={() => {
+                            setIsActionsMenuOpen(false);
+                            handleExport();
+                          }}
+                          disabled={isExporting}
+                          className="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors disabled:opacity-50"
+                        >
+                          <FileText size={15} className="text-indigo-600 dark:text-indigo-400" />
+                          <span className="font-medium">
+                            {isExporting ? 'Exporting Report...' : 'Full Transcript Report (PDF)'}
+                          </span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setIsActionsMenuOpen(false);
+                            setIsShareModalOpen(true);
+                          }}
+                          className="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors"
+                        >
+                          <Share2 size={15} className="text-indigo-600 dark:text-indigo-400" />
+                          <span className="font-medium">Share Snapshot Card</span>
+                        </button>
+
+                        <div className="h-px bg-gray-100 dark:bg-gray-800 my-1" />
+                      </>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setIsActionsMenuOpen(false);
+                        setIsAddingSemester(false);
+                        setIsTourActive(true);
+                      }}
+                      className="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors"
+                    >
+                      <HelpCircle size={15} className="text-gray-500 dark:text-gray-400" />
+                      <span className="font-medium">Interactive Guide & Tour</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setIsActionsMenuOpen(false);
+                        setIsAboutModalOpen(true);
+                      }}
+                      className="w-full text-left px-3.5 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2.5 transition-colors"
+                    >
+                      <Info size={15} className="text-gray-500 dark:text-gray-400" />
+                      <span className="font-medium">About & Data Protection</span>
+                    </button>
+
+                    {displaySemesters.length > 0 && (
+                      <>
+                        <div className="h-px bg-gray-100 dark:bg-gray-800 my-1" />
+                        <button
+                          onClick={() => {
+                            setIsActionsMenuOpen(false);
+                            setIsResetting(true);
+                          }}
+                          className="w-full text-left px-3.5 py-2.5 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 transition-colors"
+                        >
+                          <Trash2 size={15} />
+                          <span className="font-medium">Clear All Semesters</span>
+                        </button>
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </header>
@@ -464,18 +630,55 @@ export default function App() {
 
       <ConfirmModal
         isOpen={semesterToDelete !== null}
-        title="Delete Semester"
-        message="Are you sure you want to delete this semester? All courses inside it will be lost."
-        confirmText="Delete"
+        title={
+          semesterBeingDeleted
+            ? `Delete ${semesterBeingDeleted.name || `${semesterBeingDeleted.level} — ${semesterBeingDeleted.term}`}`
+            : 'Delete Semester'
+        }
+        message="This will permanently delete this semester and all courses recorded within it. This action cannot be undone."
+        confirmText="Delete Semester"
+        details={
+          semesterBeingDeleted
+            ? [
+                {
+                  label: 'Semester',
+                  value: semesterBeingDeleted.name || `${semesterBeingDeleted.level} — ${semesterBeingDeleted.term}`,
+                },
+                {
+                  label: 'Courses Included',
+                  value: `${semesterBeingDeleted.courses.length} ${semesterBeingDeleted.courses.length === 1 ? 'Course' : 'Courses'}`,
+                },
+                {
+                  label: 'Total Credit Units',
+                  value: `${semesterDeletedCredits} ${semesterDeletedCredits === 1 ? 'Unit' : 'Units'}`,
+                },
+              ]
+            : undefined
+        }
         onConfirm={handleDeleteSemester}
         onCancel={() => setSemesterToDelete(null)}
       />
 
       <ConfirmModal
         isOpen={isResetting}
-        title="Reset All Data"
-        message="Are you sure you want to delete all semesters and courses? This action cannot be undone."
-        confirmText="Reset All"
+        title="Erase All Academic Data"
+        message="This will permanently delete all your semesters, courses, and calculated GPA records from this device. This cannot be undone."
+        confirmText="Erase Everything"
+        requireVerificationText="DELETE"
+        details={[
+          {
+            label: 'Total Semesters',
+            value: `${semesters.length} ${semesters.length === 1 ? 'Semester' : 'Semesters'}`,
+          },
+          {
+            label: 'Total Recorded Courses',
+            value: `${semesters.reduce((acc, s) => acc + s.courses.length, 0)} Courses`,
+          },
+          {
+            label: 'Total Credit Units',
+            value: `${totalCredits} Units`,
+          },
+        ]}
         onConfirm={handleReset}
         onCancel={() => setIsResetting(false)}
       />
@@ -488,7 +691,39 @@ export default function App() {
         degreeClass={degreeClass}
       />
 
-      <footer className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-auto text-center w-full flex flex-col items-center gap-4">
+      <PrivacyAssuranceModal
+        isOpen={showPrivacyModal}
+        onConfirm={handleConfirmPrivacy}
+      />
+
+      <AboutModal
+        isOpen={isAboutModalOpen}
+        onClose={() => setIsAboutModalOpen(false)}
+        onOpenInstall={() => setIsInstallModalOpen(true)}
+        isInstalled={isStandalone}
+      />
+
+      <InstallModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+        isIOS={isIOS}
+        hasNativePrompt={!!deferredPrompt}
+        onTriggerNativePrompt={() => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult: any) => {
+              if (choiceResult && choiceResult.outcome === 'accepted') {
+                setIsStandalone(true);
+              }
+              setDeferredPrompt(null);
+            });
+          }
+        }}
+      />
+
+      <UpdateNotification />
+
+      <footer className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-auto text-center w-full flex flex-col items-center gap-3">
         {semesters.length > 0 && (
           <button
             onClick={() => setIsResetting(true)}
@@ -497,9 +732,17 @@ export default function App() {
             Clear All Data
           </button>
         )}
-        <p className="text-sm text-gray-400 dark:text-gray-500">
-          Built by <span className="font-medium text-gray-600 dark:text-gray-300">Kizito Atelier</span>
-        </p>
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            Built by <span className="font-medium text-gray-600 dark:text-gray-300">Kizito Atelier</span>
+          </p>
+          <button
+            onClick={() => setIsAboutModalOpen(true)}
+            className="text-xs text-gray-400/80 dark:text-gray-500/80 font-medium hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+          >
+            Version 1.0.1 (Release & Privacy Info)
+          </button>
+        </div>
       </footer>
     </div>
     </>

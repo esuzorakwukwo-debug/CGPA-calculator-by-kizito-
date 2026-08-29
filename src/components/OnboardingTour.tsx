@@ -29,8 +29,8 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     id: 'step-4',
-    targetId: 'tour-export-btn',
-    text: 'Generate a clean, professional academic report here.',
+    targetId: 'tour-actions-btn',
+    text: 'Access academic reports, snapshot cards, and helpful tools in the Actions menu.',
   },
   {
     id: 'step-5',

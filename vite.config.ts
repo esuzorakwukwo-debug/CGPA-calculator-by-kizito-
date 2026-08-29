@@ -11,9 +11,9 @@ export default defineConfig(({mode}) => {
       react(), 
       tailwindcss(),
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
         manifestFilename: 'manifest.json',
-        includeAssets: ['icon-192.png', 'icon-512.png'],
+        includeAssets: ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png'],
         manifest: {
           name: 'CGPA Pro by Kizito',
           short_name: 'CGPA Pro',
@@ -23,6 +23,11 @@ export default defineConfig(({mode}) => {
           display: 'standalone',
           start_url: '/',
           icons: [
+            {
+              src: '/apple-touch-icon.png',
+              sizes: '180x180',
+              type: 'image/png'
+            },
             {
               src: '/icon-192.png',
               sizes: '192x192',
@@ -36,7 +41,8 @@ export default defineConfig(({mode}) => {
           ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}']
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
         }
       })
     ],
