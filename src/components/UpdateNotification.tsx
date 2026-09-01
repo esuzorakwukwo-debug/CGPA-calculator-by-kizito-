@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { motion, AnimatePresence } from 'motion/react';
-import { RefreshCw, Sparkles, AlertCircle, ArrowRight } from 'lucide-react';
+import { RefreshCw, Sparkles, AlertCircle } from 'lucide-react';
 
 interface UpdateNotificationProps {
   /** Optional override to force the Update Required state (e.g. for critical version migrations) */
@@ -19,35 +19,107 @@ export function UpdateNotification({ isRequired = false, enabled = true }: Updat
     }
   });
 
+  const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
+  const swUrlRef = useRef<string>('/sw.js');
+
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(swUrl, registration) {
+      if (swUrl) swUrlRef.current = swUrl;
       if (registration) {
-        // Check for service worker updates every 30 minutes
-        setInterval(async () => {
-          if (!(!registration.installing && navigator)) return;
-          if ('onLine' in navigator && !navigator.onLine) return;
-          try {
-            const resp = await fetch(swUrl, {
-              cache: 'no-store',
-              headers: {
-                'cache': 'no-store',
-                'cache-control': 'no-cache',
-              },
-            });
-            if (resp?.status === 200) await registration.update();
-          } catch (e) {
-            // Silently ignore network check errors
-          }
-        }, 30 * 60 * 1000);
+        swRegistrationRef.current = registration;
+
+        // If a worker is already waiting in the background, surface the update immediately
+        if (registration.waiting) {
+          setNeedRefresh(true);
+        }
+
+        // Trigger an immediate check on initial registration
+        try {
+          registration.update().then(() => {
+            if (registration.waiting) {
+              setNeedRefresh(true);
+            }
+          }).catch(() => {});
+        } catch {}
       }
     },
     onRegisterError(error) {
       console.error('SW registration error', error);
     },
   });
+
+  // Dedicated update check trigger across app lifecycle
+  const checkServiceWorkerUpdate = useCallback(async () => {
+    const reg = swRegistrationRef.current;
+    if (!reg) return;
+    if (typeof navigator !== 'undefined' && 'onLine' in navigator && !navigator.onLine) return;
+
+    try {
+      // If already waiting, notify right away
+      if (reg.waiting) {
+        setNeedRefresh(true);
+        return;
+      }
+
+      // Check server for new sw.js with cache: no-store
+      try {
+        await fetch(swUrlRef.current, {
+          cache: 'no-store',
+          headers: {
+            'cache': 'no-store',
+            'cache-control': 'no-cache',
+          },
+        });
+      } catch {}
+
+      await reg.update();
+      if (reg.waiting) {
+        setNeedRefresh(true);
+      }
+    } catch {
+      // Silently ignore transient network errors
+    }
+  }, [setNeedRefresh]);
+
+  // Lifecycle listeners: app visibility resume, window focus, online reconnect, periodic timer
+  useEffect(() => {
+    // 1. Initial check when component mounts
+    checkServiceWorkerUpdate();
+
+    // 2. Visibility change (when user returns to installed PWA or browser tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkServiceWorkerUpdate();
+      }
+    };
+
+    // 3. Window focus (when user switches back to the app window)
+    const handleFocus = () => {
+      checkServiceWorkerUpdate();
+    };
+
+    // 4. Online event (when device regains internet connection)
+    const handleOnline = () => {
+      checkServiceWorkerUpdate();
+    };
+
+    // 5. Periodic background check every 15 minutes
+    const intervalId = setInterval(checkServiceWorkerUpdate, 15 * 60 * 1000);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [checkServiceWorkerUpdate]);
 
   const handleUpdate = () => {
     try {

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, ChevronDown, ChevronUp, PlusCircle, BookOpen, ListPlus, X, Check } from 'lucide-react';
+import { Trash2, ChevronDown, ChevronUp, PlusCircle, BookOpen, ListPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Semester, Course } from '../types';
 import { CourseItem } from './CourseItem';
 import { CourseForm } from './CourseForm';
+import { QuickAddForm } from './QuickAddForm';
 import { calculateGPA } from '../utils';
 import { ConfirmModal } from './ConfirmModal';
 
@@ -12,23 +13,49 @@ interface SemesterCardProps {
   semester: Semester;
   isFirst?: boolean;
   forceExpand?: boolean;
+  isCollapsed?: boolean;
+  isPrivacyBlurred?: boolean;
+  onToggleCollapse?: () => void;
   onUpdate: (id: string, updatedSemester: Semester) => void;
   onDelete: (id: string) => void;
 }
 
-export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelete }: SemesterCardProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+export function SemesterCard({
+  semester,
+  isFirst,
+  forceExpand,
+  isCollapsed = false,
+  isPrivacyBlurred = false,
+  onToggleCollapse,
+  onUpdate,
+  onDelete,
+}: SemesterCardProps) {
+  const [internalExpanded, setInternalExpanded] = useState(true);
   const [isAddingCourse, setIsAddingCourse] = useState(false);
-  const [isBulkAdding, setIsBulkAdding] = useState(false);
-  const [bulkText, setBulkText] = useState('');
-  const [bulkError, setBulkError] = useState<string | null>(null);
+  const [isQuickAdding, setIsQuickAdding] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
+
+  const isExpanded = forceExpand ? true : (onToggleCollapse ? !isCollapsed : internalExpanded);
+
+  const handleToggle = () => {
+    if (onToggleCollapse) {
+      onToggleCollapse();
+    } else {
+      setInternalExpanded(!internalExpanded);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleToggle();
+    }
+  };
 
   useEffect(() => {
     if (forceExpand) {
-      setIsExpanded(true);
       setIsAddingCourse(false);
-      setIsBulkAdding(false);
+      setIsQuickAdding(false);
     }
   }, [forceExpand]);
 
@@ -45,6 +72,18 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
       courses: [...semester.courses, newCourse],
     });
     setIsAddingCourse(false);
+  };
+
+  const handleAddMultipleCourses = (newCoursesData: Omit<Course, 'id'>[]) => {
+    const newCourses: Course[] = newCoursesData.map((data) => ({
+      ...data,
+      id: crypto.randomUUID(),
+    }));
+    onUpdate(semester.id, {
+      ...semester,
+      courses: [...semester.courses, ...newCourses],
+    });
+    setIsQuickAdding(false);
   };
 
   const handleUpdateCourse = (courseId: string, updatedData: Omit<Course, 'id'>) => {
@@ -64,78 +103,6 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
 
   const courseBeingDeleted = semester.courses.find((c) => c.id === courseToDelete);
 
-  // Helper to parse live bulk text for live preview
-  const parseBulkContent = (text: string) => {
-    const lines = text.split('\n');
-    const valid: Course[] = [];
-    let invalidCount = 0;
-
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      const parts = line.split(',').map((p) => p.trim());
-      if (parts.length !== 3) {
-        invalidCount++;
-        continue;
-      }
-      const [title, unitsStr, gradeStr] = parts;
-      const creditUnit = parseInt(unitsStr, 10);
-      const grade = gradeStr.toUpperCase();
-
-      if (
-        !title ||
-        isNaN(creditUnit) ||
-        creditUnit <= 0 ||
-        !['A', 'B', 'C', 'D', 'E', 'F'].includes(grade)
-      ) {
-        invalidCount++;
-        continue;
-      }
-
-      valid.push({
-        id: crypto.randomUUID(),
-        title,
-        creditUnit,
-        grade: grade as any,
-      });
-    }
-
-    return { valid, invalidCount };
-  };
-
-  const { valid: previewBulkCourses, invalidCount: previewBulkInvalid } = parseBulkContent(bulkText);
-  const previewBulkUnits = previewBulkCourses.reduce((sum, c) => sum + c.creditUnit, 0);
-
-  const handleBulkAdd = () => {
-    if (!bulkText.trim()) {
-      setIsBulkAdding(false);
-      return;
-    }
-
-    const { valid: newCourses, invalidCount: errorCount } = parseBulkContent(bulkText);
-
-    if (newCourses.length > 0) {
-      onUpdate(semester.id, {
-        ...semester,
-        courses: [...semester.courses, ...newCourses],
-      });
-    }
-
-    if (errorCount > 0) {
-      setBulkError(`Imported ${newCourses.length} courses. Ignored ${errorCount} invalid lines.`);
-      if (newCourses.length > 0) {
-        setBulkText(''); // Clear text if we imported some, but leave error visible
-        setTimeout(() => {
-          setIsBulkAdding(false);
-          setBulkError(null);
-        }, 4000);
-      }
-    } else {
-      setIsBulkAdding(false);
-      setBulkText('');
-      setBulkError(null);
-    }
-  };
-
   return (
     <>
       <motion.div
@@ -145,11 +112,17 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
         className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-800 overflow-hidden mb-6 transition-all duration-300"
       >
         <div
-          className="flex items-center justify-between p-5 cursor-pointer bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          onClick={() => setIsExpanded(!isExpanded)}
+          id={isFirst ? "tour-semester-header-first" : undefined}
+          role="button"
+          tabIndex={0}
+          aria-expanded={isExpanded}
+          aria-label={`Toggle ${semester.name || `${semester.level} — ${semester.term}`} courses`}
+          className="flex items-center justify-between p-5 cursor-pointer bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-inset"
+          onClick={handleToggle}
+          onKeyDown={handleKeyDown}
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+            <div className={`w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg transition-all duration-300 ${isPrivacyBlurred ? 'filter blur-sm select-none' : ''}`}>
               {gpa.toFixed(2)}
             </div>
             <div>
@@ -198,9 +171,10 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                 ) : (
                   <div className="mb-4">
                     <AnimatePresence>
-                      {semester.courses.map((course) => (
+                      {semester.courses.map((course, cIdx) => (
                         <motion.div
                           key={course.id}
+                          id={isFirst && cIdx === 0 ? "tour-course-item-first" : undefined}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: 10 }}
@@ -228,78 +202,20 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                   </motion.div>
                 )}
 
-                {isBulkAdding && (
+                {isQuickAdding && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700/50"
                   >
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Bulk Import Courses
-                      </label>
-                      <button 
-                        onClick={() => { setIsBulkAdding(false); setBulkError(null); }}
-                        className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl transition-colors"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                      Format: <span className="font-mono bg-gray-200 dark:bg-gray-700 px-1 rounded">Course Name, Units, Grade</span> (e.g., MLS 411, 3, A). One per line.
-                    </p>
-                    <textarea
-                      value={bulkText}
-                      onChange={(e) => {
-                        setBulkText(e.target.value);
-                        if (bulkError) setBulkError(null);
-                      }}
-                      placeholder="MLS 411, 3, A&#10;MTH 101, 4, B"
-                      className="w-full h-32 px-3 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none mb-3"
+                    <QuickAddForm
+                      existingCourses={semester.courses}
+                      onAddMultiple={handleAddMultipleCourses}
+                      onCancel={() => setIsQuickAdding(false)}
                     />
-                    {/* Live Preview / Status of Parsed Courses */}
-                    {bulkText.trim() && (
-                      <div className="mb-3 p-3 rounded-xl text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/80 space-y-1">
-                        <div className="flex items-center justify-between font-medium">
-                          <span className={previewBulkCourses.length > 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "text-gray-500"}>
-                            {previewBulkCourses.length > 0 
-                              ? `✓ ${previewBulkCourses.length} ${previewBulkCourses.length === 1 ? 'course' : 'courses'} ready to add (${previewBulkUnits} total units)` 
-                              : 'No valid courses detected yet'}
-                          </span>
-                          {previewBulkInvalid > 0 && (
-                            <span className="text-amber-600 dark:text-amber-400 text-xs">
-                              {previewBulkInvalid} invalid {previewBulkInvalid === 1 ? 'line' : 'lines'}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {bulkError && (
-                      <div className="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-xs rounded-xl border border-amber-200 dark:border-amber-800/30">
-                        {bulkError}
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleBulkAdd}
-                        disabled={previewBulkCourses.length === 0}
-                        className={`flex-1 min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm ${
-                          previewBulkCourses.length > 0
-                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                        }`}
-                      >
-                        <Check size={18} />
-                        {previewBulkCourses.length > 0
-                          ? `Import ${previewBulkCourses.length} ${previewBulkCourses.length === 1 ? 'Course' : 'Courses'} (${previewBulkUnits} Units)`
-                          : 'Import Courses'}
-                      </button>
-                    </div>
                   </motion.div>
                 )}
 
-                {!isAddingCourse && !isBulkAdding && (
+                {!isAddingCourse && !isQuickAdding && (
                   <div className="flex gap-2" id={isFirst ? "tour-add-method" : undefined}>
                     <button
                       id={isFirst ? "tour-single-add" : undefined}
@@ -311,11 +227,11 @@ export function SemesterCard({ semester, isFirst, forceExpand, onUpdate, onDelet
                     </button>
                     <button
                       id={isFirst ? "tour-bulk-add" : undefined}
-                      onClick={() => setIsBulkAdding(true)}
+                      onClick={() => setIsQuickAdding(true)}
                       className="flex-1 min-h-[44px] py-3 px-4 flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-xl transition-colors border border-emerald-100 dark:border-emerald-500/20 border-dashed"
                     >
                       <ListPlus size={18} />
-                      Bulk Add
+                      Quick Add Courses
                     </button>
                   </div>
                 )}

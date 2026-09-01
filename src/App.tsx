@@ -6,7 +6,6 @@ import { Semester } from './types';
 import { LEVELS, TERMS, GRADE_POINTS } from './constants';
 import { Dashboard } from './components/Dashboard';
 import { SemesterCard } from './components/SemesterCard';
-import { TargetSimulator } from './components/TargetSimulator';
 import { SmartInsights } from './components/SmartInsights';
 import { CgpaPlanner } from './components/CgpaPlanner';
 import { ConfirmModal } from './components/ConfirmModal';
@@ -51,7 +50,17 @@ export default function App() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [collapsedSemesters, setCollapsedSemesters] = useLocalStorage<Record<string, boolean>>(
+    'cgpa-pro-semester-collapsed',
+    {}
+  );
+  const [isPrivacyBlurred, setIsPrivacyBlurred] = useLocalStorage<boolean>(
+    'cgpa-pro-privacy-blur',
+    false
+  );
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(() => {
+    return (window as any).__deferredInstallPrompt || null;
+  });
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [hasSeenSplash, setHasSeenSplash] = useLocalStorage('cgpa-pro-splash-seen', false);
@@ -92,30 +101,53 @@ export default function App() {
     const isApple = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(isApple);
 
+    // If early script already captured the prompt, sync it to state
+    if ((window as any).__deferredInstallPrompt) {
+      setDeferredPrompt((window as any).__deferredInstallPrompt);
+    }
+
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+      (window as any).__deferredInstallPrompt = e;
       setDeferredPrompt(e);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', () => {
+    const handleCustomCapture = () => {
+      if ((window as any).__deferredInstallPrompt) {
+        setDeferredPrompt((window as any).__deferredInstallPrompt);
+      }
+    };
+
+    const handleAppInstalled = () => {
       setIsStandalone(true);
       setDeferredPrompt(null);
-    });
+      (window as any).__deferredInstallPrompt = null;
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('app-beforeinstallprompt-captured', handleCustomCapture);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('app-beforeinstallprompt-captured', handleCustomCapture);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
   const handleInstallClick = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult: any) => {
+    const promptToUse = deferredPrompt || (window as any).__deferredInstallPrompt;
+    if (promptToUse) {
+      promptToUse.prompt();
+      promptToUse.userChoice.then((choiceResult: any) => {
         if (choiceResult && choiceResult.outcome === 'accepted') {
           setIsStandalone(true);
         }
         setDeferredPrompt(null);
+        (window as any).__deferredInstallPrompt = null;
+      }).catch(() => {
+        setDeferredPrompt(null);
+        (window as any).__deferredInstallPrompt = null;
       });
     } else {
       setIsInstallModalOpen(true);
@@ -192,6 +224,13 @@ export default function App() {
     setCustomName('');
   };
 
+  const handleToggleSemesterCollapse = (semesterId: string) => {
+    setCollapsedSemesters((prev) => ({
+      ...prev,
+      [semesterId]: !prev[semesterId],
+    }));
+  };
+
   const handleUpdateSemester = (id: string, updatedSemester: Semester) => {
     setSemesters(semesters.map((s) => (s.id === id ? updatedSemester : s)));
   };
@@ -199,12 +238,18 @@ export default function App() {
   const handleDeleteSemester = () => {
     if (semesterToDelete) {
       setSemesters(semesters.filter((s) => s.id !== semesterToDelete));
+      setCollapsedSemesters((prev) => {
+        const next = { ...prev };
+        delete next[semesterToDelete];
+        return next;
+      });
       setSemesterToDelete(null);
     }
   };
 
   const handleReset = () => {
     setSemesters([]);
+    setCollapsedSemesters({});
     setIsResetting(false);
   };
 
@@ -466,12 +511,18 @@ export default function App() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="export-content">
-        <Dashboard semesters={displaySemesters} />
+        <Dashboard
+          semesters={displaySemesters}
+          isPrivacyBlurred={isPrivacyBlurred}
+          onTogglePrivacy={() => setIsPrivacyBlurred(!isPrivacyBlurred)}
+        />
         <SmartInsights semesters={displaySemesters} />
-        <TargetSimulator semesters={displaySemesters} />
-        <CgpaPlanner semesters={displaySemesters} />
+        <CgpaPlanner
+          semesters={displaySemesters}
+          isPrivacyBlurred={isPrivacyBlurred}
+        />
 
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6" id="tour-semesters-section">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Semesters</h2>
           <div className="flex items-center gap-3">
             <SmartPdfScanner onDataExtracted={(newSemesters) => {
@@ -612,6 +663,9 @@ export default function App() {
                   semester={semester}
                   isFirst={index === 0}
                   forceExpand={isTourActive && index === 0}
+                  isCollapsed={!!collapsedSemesters[semester.id]}
+                  isPrivacyBlurred={isPrivacyBlurred}
+                  onToggleCollapse={() => handleToggleSemesterCollapse(semester.id)}
                   onUpdate={handleUpdateSemester}
                   onDelete={(id) => setSemesterToDelete(id)}
                 />
@@ -708,18 +762,8 @@ export default function App() {
         isOpen={isInstallModalOpen}
         onClose={() => setIsInstallModalOpen(false)}
         isIOS={isIOS}
-        hasNativePrompt={!!deferredPrompt}
-        onTriggerNativePrompt={() => {
-          if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult: any) => {
-              if (choiceResult && choiceResult.outcome === 'accepted') {
-                setIsStandalone(true);
-              }
-              setDeferredPrompt(null);
-            });
-          }
-        }}
+        hasNativePrompt={!!(deferredPrompt || (window as any).__deferredInstallPrompt)}
+        onTriggerNativePrompt={handleInstallClick}
       />
 
       <UpdateNotification enabled={!showSplash && !showPrivacyModal && !isTourActive} />

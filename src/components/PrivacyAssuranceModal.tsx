@@ -57,7 +57,7 @@ export function PrivacyAssuranceModal({ isOpen, onConfirm }: PrivacyAssuranceMod
                   <span className="font-semibold block mb-0.5 text-emerald-900 dark:text-emerald-100">
                     Local Device Storage Only
                   </span>
-                  Your manually entered courses, grades, semesters, Target Simulator goals, and CGPA calculations are stored exclusively on your device's browser.
+                  Your manually entered courses, grades, semesters, CGPA Planner goals, and CGPA calculations are stored exclusively on your device's browser.
                 </div>
               </div>
 

@@ -6,9 +6,10 @@ import { calculateCGPA } from '../utils';
 
 interface CgpaPlannerProps {
   semesters: Semester[];
+  isPrivacyBlurred?: boolean;
 }
 
-export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
+export function CgpaPlanner({ semesters, isPrivacyBlurred = false }: CgpaPlannerProps) {
   const [durationOption, setDurationOption] = useState<string>('8');
   const [manualSemesters, setManualSemesters] = useState<string>('8');
   const [targetCgpaInput, setTargetCgpaInput] = useState<string>('');
@@ -75,7 +76,7 @@ export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
               <h4 className="font-semibold">Target Not Achievable</h4>
             </div>
             <p className="text-sm text-red-800 dark:text-red-200 mb-4">
-              To reach a {target.toFixed(2)} CGPA, you would need an average GPA of <span className="font-bold">{requiredGpa.toFixed(2)}</span> in your remaining {remainingSemesters} semesters, which is above the 5.0 maximum.
+              To reach a {target.toFixed(2)} CGPA, you would need an average GPA of <span className={`font-bold transition-all duration-300 ${isPrivacyBlurred ? 'filter blur-sm select-none' : ''}`}>{requiredGpa.toFixed(2)}</span> in your remaining {remainingSemesters} semesters, which is above the 5.0 maximum.
             </p>
             <div className="bg-white/60 dark:bg-black/20 p-3 rounded-xl text-xs text-red-700 dark:text-red-300">
               <span className="font-semibold block mb-1">Insight:</span>
@@ -110,7 +111,7 @@ export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
             <h4 className="font-semibold">Target Achievable</h4>
           </div>
           <p className="text-sm text-emerald-800 dark:text-emerald-200 mb-4">
-            To reach a {target.toFixed(2)} CGPA, you need an average GPA of <span className="font-bold text-lg">{requiredGpa.toFixed(2)}</span> in your remaining {remainingSemesters} semesters.
+            To reach a {target.toFixed(2)} CGPA, you need an average GPA of <span className={`font-bold text-lg transition-all duration-300 ${isPrivacyBlurred ? 'filter blur-sm select-none' : ''}`}>{requiredGpa.toFixed(2)}</span> in your remaining {remainingSemesters} semesters.
           </p>
           <div className="bg-white/60 dark:bg-black/20 p-3 rounded-xl text-xs text-emerald-700 dark:text-emerald-300">
             <span className="font-semibold block mb-1">Insight:</span>
@@ -135,12 +136,12 @@ export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div className="bg-white/60 dark:bg-black/20 p-4 rounded-xl">
             <p className="text-xs text-indigo-600/80 dark:text-indigo-400/80 font-medium mb-1 uppercase tracking-wider">Projected CGPA</p>
-            <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">{currentCgpa.toFixed(2)}</p>
+            <p className={`text-2xl font-bold text-indigo-900 dark:text-indigo-100 transition-all duration-300 ${isPrivacyBlurred ? 'filter blur-sm select-none' : ''}`}>{currentCgpa.toFixed(2)}</p>
             <p className="text-xs text-indigo-700/70 dark:text-indigo-300/70 mt-1">If you maintain current trend</p>
           </div>
           <div className="bg-white/60 dark:bg-black/20 p-4 rounded-xl">
             <p className="text-xs text-indigo-600/80 dark:text-indigo-400/80 font-medium mb-1 uppercase tracking-wider">Maximum Possible</p>
-            <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">{maxPossibleCgpa.toFixed(2)}</p>
+            <p className={`text-2xl font-bold text-indigo-900 dark:text-indigo-100 transition-all duration-300 ${isPrivacyBlurred ? 'filter blur-sm select-none' : ''}`}>{maxPossibleCgpa.toFixed(2)}</p>
             <p className="text-xs text-indigo-700/70 dark:text-indigo-300/70 mt-1">With 5.0 in remaining sems</p>
           </div>
         </div>
@@ -154,7 +155,7 @@ export function CgpaPlanner({ semesters }: CgpaPlannerProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-gray-100 dark:border-gray-800 shadow-sm mb-6 relative overflow-hidden">
+    <div id="tour-cgpa-planner" className="bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 border border-gray-100 dark:border-gray-800 shadow-sm mb-6 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
       
       <div className="flex items-center gap-3 mb-6 relative z-10">

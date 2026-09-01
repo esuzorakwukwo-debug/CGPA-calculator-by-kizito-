@@ -197,6 +197,7 @@ export function SmartPdfScanner({ onDataExtracted }: SmartPdfScannerProps) {
   return (
     <>
       <button
+        id="tour-smart-scanner-btn"
         onClick={() => fileInputRef.current?.click()}
         className="min-h-[44px] flex items-center justify-center gap-2 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-sm"
       >

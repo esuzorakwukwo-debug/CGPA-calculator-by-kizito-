@@ -27,6 +27,17 @@
           document.documentElement.classList.add('dark');
         }
       } catch (e) {}
+
+      // Early capture of beforeinstallprompt so Chromium install prompt is never missed
+      window.__deferredInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', function(event) {
+        event.preventDefault();
+        window.__deferredInstallPrompt = event;
+        window.dispatchEvent(new CustomEvent('app-beforeinstallprompt-captured'));
+      });
+      window.addEventListener('appinstalled', function() {
+        window.__deferredInstallPrompt = null;
+      });
     </script>
   </head>
   <body class="bg-gray-50 dark:bg-gray-950">

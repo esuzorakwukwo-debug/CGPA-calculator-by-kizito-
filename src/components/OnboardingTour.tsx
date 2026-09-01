@@ -1,53 +1,71 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 
 interface TourStep {
   id: string;
   targetId: string;
-  title?: string;
+  title: string;
   text: string;
-  waitForClick?: string; // ID of the element to wait for a click on
-  highlightIds?: string[]; // Multiple IDs to highlight
+  waitForClick?: string;
+  highlightIds?: string[];
 }
 
 const TOUR_STEPS: TourStep[] = [
   {
-    id: 'step-1',
+    id: 'step-academic-standing',
     targetId: 'tour-dashboard-gpa',
-    text: 'Your academic vitals at a glance.',
+    title: 'Academic Standing & Privacy',
+    text: 'View your real-time CGPA, degree classification, and completed credits. Tap the Eye icon anytime in public or study halls to blur your academic records instantly.',
   },
   {
-    id: 'step-2',
-    targetId: 'tour-semester-cards',
-    text: 'Tap any course to edit your grades or credit units.',
-  },
-  {
-    id: 'step-3',
-    targetId: 'tour-target-simulator',
-    text: 'Plan your comeback. See exactly what GPA you need to reach your goal.',
-  },
-  {
-    id: 'step-4',
-    targetId: 'tour-actions-btn',
-    text: 'Access academic reports, snapshot cards, and helpful tools in the Actions menu.',
-  },
-  {
-    id: 'step-5',
+    id: 'step-add-semester',
     targetId: 'tour-add-semester-btn',
-    text: 'Start building your record. Add a new level or semester here.',
+    title: 'Adding a Semester',
+    text: 'Organize your academic journey term by term. Select your level (100L–600L) and term (1st or 2nd Semester), or provide a custom name like "Industrial Training".',
   },
   {
-    id: 'step-6',
-    targetId: 'tour-add-method',
-    highlightIds: ['tour-single-add', 'tour-bulk-add'],
-    text: 'Precision Mode: Add courses one by one for accurate tracking.\n\nThe Scholar Shortcut: Paste your full result list to fill a semester instantly.',
+    id: 'step-single-add',
+    targetId: 'tour-single-add',
+    title: 'Adding Single Courses',
+    text: 'Use "Add Course" to enter individual courses with their course code, assigned credit units, and letter grade.',
   },
   {
-    id: 'step-7',
-    targetId: 'tour-dashboard-gpa',
-    text: 'Watch it grow. Your class standing updates instantly as you add results.',
-  }
+    id: 'step-units-grades',
+    targetId: 'tour-course-item-first',
+    title: 'Units, Grades & GPA Math',
+    text: 'Courses are weighted by Credit Units (1–12) and Nigerian Grade Points (A=5, B=4, C=3, D=2, E=1, F=0). Quality Points are automatically tallied to compute your exact GPA and CGPA.',
+  },
+  {
+    id: 'step-folding-semesters',
+    targetId: 'tour-semester-header-first',
+    title: 'Folding & Managing Semesters',
+    text: 'Tap anywhere on a semester header to fold or unfold it. Folding keeps your dashboard tidy and focused—your courses and calculations remain fully saved and remembered across sessions.',
+  },
+  {
+    id: 'step-quick-add',
+    targetId: 'tour-bulk-add',
+    title: 'Quick Multi-Course Entry',
+    text: 'Need to add multiple courses quickly? Tap "Quick Add Courses" to create repeatable draft rows with "＋ Add Another Course", then press "Save Courses" to commit them all at once.',
+  },
+  {
+    id: 'step-smart-scanner',
+    targetId: 'tour-smart-scanner-btn',
+    title: 'Smart Course Scanner',
+    text: 'Save time by scanning your syllabus, course registration document, or university transcript PDF. AI automatically extracts course codes, titles, and credit units.',
+  },
+  {
+    id: 'step-cgpa-planner',
+    targetId: 'tour-cgpa-planner',
+    title: 'CGPA Planner & Goal Tracker',
+    text: 'Plan ahead toward your dream degree division. Set your degree duration and target CGPA to see the realistic semester-by-semester GPA needed across your remaining degree.',
+  },
+  {
+    id: 'step-actions',
+    targetId: 'tour-actions-btn',
+    title: 'Actions, Reports & Transcripts',
+    text: 'Generate official Full Transcript PDFs, export Share Snapshot cards, switch themes, or review data protection policies anytime from the Actions menu.',
+  },
 ];
 
 interface OnboardingTourProps {
@@ -60,6 +78,8 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [highlightRects, setHighlightRects] = useState<DOMRect[]>([]);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [tooltipHeight, setTooltipHeight] = useState<number>(240);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   const currentStep = TOUR_STEPS[currentStepIndex];
 
@@ -76,15 +96,19 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
   useEffect(() => {
     if (!isActive || !currentStep) return;
     
-    const targetEl = document.getElementById(currentStep.targetId);
-    if (targetEl) {
-      setTimeout(() => {
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
+    if (currentStep.targetId === 'tour-actions-btn') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const targetEl = document.getElementById(currentStep.targetId);
+      if (targetEl) {
+        setTimeout(() => {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
+      }
     }
-  }, [currentStep, isActive]);
+  }, [currentStepIndex, currentStep, isActive]);
 
-  // Update rects continuously for animations/resizes without interrupting scroll
+  // Update rects continuously for animations/resizes/scrolls
   useEffect(() => {
     if (!isActive || !currentStep) return;
 
@@ -104,97 +128,27 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
       } else {
         setHighlightRects([]);
       }
+
+      if (tooltipRef.current) {
+        const h = tooltipRef.current.offsetHeight;
+        if (h > 0) {
+          setTooltipHeight(h);
+        }
+      }
     };
 
-    const timeoutId = setTimeout(updateRects, 50);
-    const intervalId = setInterval(updateRects, 100); // Fast update for smooth tracking
+    updateRects();
+    window.addEventListener('scroll', updateRects, { passive: true });
+    window.addEventListener('resize', updateRects, { passive: true });
+
+    const intervalId = setInterval(updateRects, 60);
 
     return () => {
-      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', updateRects);
+      window.removeEventListener('resize', updateRects);
       clearInterval(intervalId);
     };
   }, [currentStep, isActive, windowSize]);
-
-  // Handle z-index for highlighted elements (The Blur Bug Fix)
-  useEffect(() => {
-    if (!isActive || !currentStep) return;
-
-    const targetIds = currentStep.highlightIds || [currentStep.targetId];
-    const elements = targetIds.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
-
-    // Find all parents that create stacking contexts to elevate them too
-    const elementsToElevate = new Set<HTMLElement>();
-    
-    elements.forEach(el => {
-      elementsToElevate.add(el);
-      let parent = el.parentElement;
-      while (parent && parent !== document.body) {
-        const style = window.getComputedStyle(parent);
-        // If the parent has a z-index other than auto, or is sticky/fixed/absolute/relative, it might create a stacking context
-        if (
-          style.zIndex !== 'auto' || 
-          style.position === 'sticky' || 
-          style.position === 'fixed' ||
-          style.transform !== 'none' ||
-          style.opacity !== '1'
-        ) {
-          elementsToElevate.add(parent);
-        }
-        parent = parent.parentElement;
-      }
-    });
-
-    const elevatedElements = Array.from(elementsToElevate);
-
-    // Store original styles to restore them later
-    const originalStyles = elevatedElements.map(el => ({
-      position: el.style.getPropertyValue('position'),
-      positionPriority: el.style.getPropertyPriority('position'),
-      zIndex: el.style.getPropertyValue('z-index'),
-      zIndexPriority: el.style.getPropertyPriority('z-index'),
-    }));
-
-    elevatedElements.forEach(el => {
-      const currentPos = window.getComputedStyle(el).position;
-      if (currentPos === 'static') {
-        el.style.setProperty('position', 'relative', 'important');
-      }
-      el.style.setProperty('z-index', '9999', 'important');
-    });
-
-    return () => {
-      elevatedElements.forEach((el, index) => {
-        const orig = originalStyles[index];
-        if (orig.position) {
-          el.style.setProperty('position', orig.position, orig.positionPriority);
-        } else {
-          el.style.removeProperty('position');
-        }
-        
-        if (orig.zIndex) {
-          el.style.setProperty('z-index', orig.zIndex, orig.zIndexPriority);
-        } else {
-          el.style.removeProperty('z-index');
-        }
-      });
-    };
-  }, [currentStep, isActive]);
-
-  // Handle click-to-advance steps
-  useEffect(() => {
-    if (!isActive || !currentStep?.waitForClick) return;
-
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const el = document.getElementById(currentStep.waitForClick!);
-      if (el && (el === target || el.contains(target))) {
-        handleNext();
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, [currentStep, isActive]);
 
   // Keyboard navigation and click blocking
   useEffect(() => {
@@ -213,13 +167,11 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
     };
 
     const blockInteractions = (e: Event) => {
-      // Allow clicks inside the tooltip
       const tooltip = document.getElementById('tour-tooltip');
       if (tooltip && tooltip.contains(e.target as Node)) {
         return;
       }
       
-      // If it's a waitForClick step, allow clicks on the target
       if (currentStep?.waitForClick) {
         const target = document.getElementById(currentStep.waitForClick);
         if (target && target.contains(e.target as Node)) {
@@ -227,14 +179,12 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
         }
       }
 
-      // Otherwise, block the interaction
       e.stopPropagation();
       e.preventDefault();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     
-    // Block clicks and touches outside the tooltip
     document.addEventListener('click', blockInteractions, true);
     document.addEventListener('mousedown', blockInteractions, true);
     document.addEventListener('mouseup', blockInteractions, true);
@@ -271,81 +221,152 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
 
   const rectsToDraw = highlightRects.length > 0 ? highlightRects : (targetRect ? [targetRect] : []);
 
+  // Adaptive Clearance and Collision-Free Positioning
+  const clearance = 16;
+  const cardWidth = Math.min(windowSize.width - 32, 380);
+  const cardHeight = tooltipHeight || 240;
+
+  let computedTop = 16;
+  let computedLeft = 16;
+
+  if (targetRect) {
+    // 1. Horizontal positioning: Center horizontally relative to target with 16px viewport margins
+    const targetCenterX = targetRect.left + targetRect.width / 2;
+    computedLeft = targetCenterX - cardWidth / 2;
+    computedLeft = Math.max(16, Math.min(computedLeft, windowSize.width - cardWidth - 16));
+
+    // 2. Vertical positioning: Measure space above and below with 16px clearance
+    const spaceBelow = windowSize.height - targetRect.bottom - clearance;
+    const spaceAbove = targetRect.top - clearance;
+
+    if (spaceBelow >= cardHeight + clearance) {
+      // Ample space below the highlighted element
+      computedTop = targetRect.bottom + clearance;
+    } else if (spaceAbove >= cardHeight + clearance) {
+      // Ample space above the highlighted element
+      computedTop = targetRect.top - cardHeight - clearance;
+    } else {
+      // Tight mobile viewport fallback: Place on side with more space, strictly respecting viewport bounds
+      if (spaceBelow >= spaceAbove) {
+        computedTop = Math.max(targetRect.bottom + clearance, windowSize.height - cardHeight - 16);
+      } else {
+        computedTop = Math.min(targetRect.top - cardHeight - clearance, 16);
+      }
+    }
+
+    // Safety clamp within viewport bounds
+    computedTop = Math.max(16, Math.min(computedTop, Math.max(16, windowSize.height - cardHeight - 16)));
+  } else {
+    // Fallback if target element is momentarily not found
+    computedLeft = Math.max(16, (windowSize.width - cardWidth) / 2);
+    computedTop = Math.max(16, (windowSize.height - cardHeight) / 2);
+  }
+
   return (
     <AnimatePresence>
       {isActive && currentStep && (
         <>
-          {/* Overlay Container - z-[9998] so target elements (z-[9999]) sit above it */}
+          {/* SVG Dimmed Overlay with Physical Cutouts for Highlighted Targets */}
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.25 }}
             className="fixed inset-0 z-[9998] pointer-events-none"
           >
-            {/* Dimmed Background Overlay */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-[4px]" />
+            <svg className="w-full h-full" width="100%" height="100%">
+              <defs>
+                <mask id="tour-spotlight-mask">
+                  {/* White background: creates dark overlay */}
+                  <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                  {/* Black rects: punch out crystal clear holes over targets */}
+                  {rectsToDraw.map((rect, i) => (
+                    <rect
+                      key={`mask-cutout-${i}`}
+                      x={rect.left - 6}
+                      y={rect.top - 6}
+                      width={rect.width + 12}
+                      height={rect.height + 12}
+                      rx="14"
+                      ry="14"
+                      fill="black"
+                    />
+                  ))}
+                </mask>
+              </defs>
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                fill="rgba(0, 0, 0, 0.65)"
+                mask="url(#tour-spotlight-mask)"
+              />
+            </svg>
+          </motion.div>
 
-            {/* Highlights */}
+          {/* Glowing Animated Spotlight Ring - z-[9999] directly above mask */}
+          <div className="fixed inset-0 z-[9999] pointer-events-none">
             {rectsToDraw.map((rect, i) => (
               <motion.div
-                key={`${currentStep.id}-highlight-${i}`}
+                key={`${currentStep.id}-spotlight-ring-${i}`}
                 initial={false}
                 animate={{
-                  top: rect.top - 10,
-                  left: rect.left - 10,
-                  width: rect.width + 20,
-                  height: rect.height + 20,
+                  top: rect.top - 6,
+                  left: rect.left - 6,
+                  width: rect.width + 12,
+                  height: rect.height + 12,
                 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute bg-transparent border-2 border-indigo-500 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.5)] pointer-events-none"
+                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                className="absolute bg-transparent border-2 border-indigo-400 dark:border-indigo-400 rounded-2xl shadow-[0_0_0_1px_rgba(255,255,255,0.25),0_0_24px_rgba(99,102,241,0.7)] pointer-events-none ring-4 ring-indigo-500/20"
               />
             ))}
-          </motion.div>
+          </div>
 
           {/* Tooltip Container - z-[10001] so it sits above both overlay and target elements */}
           <motion.div className="fixed inset-0 z-[10001] pointer-events-none">
             <AnimatePresence mode="wait">
-              {targetRect && (
-                <motion.div
-                  key={currentStep.id}
-                  id="tour-tooltip"
-                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -15, scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  className="absolute pointer-events-auto w-full max-w-sm"
-                  style={{
-                    top: targetRect.bottom + 24 > windowSize.height - 200 
-                      ? Math.max(16, targetRect.top - 200)
-                      : targetRect.bottom + 24,
-                    left: Math.max(16, Math.min(targetRect.left, windowSize.width - 384 - 16)),
-                  }}
-                >
-                  <div className="bg-gray-900 dark:bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-2xl text-white">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex gap-1.5 pt-2">
-                        {TOUR_STEPS.map((_, i) => (
-                          <div 
-                            key={i} 
-                            className={`h-1.5 rounded-full transition-all duration-300 ${i === currentStepIndex ? 'w-6 bg-indigo-500' : 'w-1.5 bg-gray-700'}`}
-                          />
-                        ))}
+              <motion.div
+                key={currentStep.id}
+                ref={tooltipRef}
+                id="tour-tooltip"
+                initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -12, scale: 0.96 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                className="absolute pointer-events-auto w-full max-w-sm"
+                style={{
+                  top: computedTop,
+                  left: computedLeft,
+                  width: cardWidth,
+                }}
+              >
+                  <div className="bg-gray-900/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-700/80 rounded-2xl p-5 shadow-2xl text-white">
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
+                          Step {currentStepIndex + 1} of {TOUR_STEPS.length}
+                        </span>
                       </div>
                       <button 
                         onClick={handleSkip}
                         className="w-11 h-11 min-w-[44px] min-h-[44px] -mr-2 -mt-2 flex items-center justify-center p-2.5 text-gray-400 hover:text-white rounded-full transition-colors"
                         title="Close Tour"
+                        aria-label="Close Tour"
                       >
                         <X size={18} />
                       </button>
                     </div>
+
+                    <h3 className="text-base font-bold text-white mb-1.5">
+                      {currentStep.title}
+                    </h3>
                     
-                    <p className="text-sm leading-relaxed text-gray-200 whitespace-pre-wrap">
+                    <p className="text-sm leading-relaxed text-gray-300">
                       {currentStep.text}
                     </p>
 
-                    <div className="mt-5 flex items-center justify-between">
+                    <div className="mt-5 pt-3 border-t border-gray-800 flex items-center justify-between">
                       <button
                         onClick={handleSkip}
                         className="min-h-[44px] flex items-center text-gray-400 hover:text-white transition-colors text-xs font-semibold px-2 py-2"
@@ -353,38 +374,28 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
                         Skip Tour
                       </button>
 
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
                         {currentStepIndex > 0 && (
                           <button
                             onClick={handleBack}
-                            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-colors"
+                            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition-colors border border-gray-700/60"
                             title="Previous Step"
+                            aria-label="Previous Step"
                           >
                             <ChevronLeft size={18} />
                           </button>
                         )}
-                        {!currentStep.waitForClick && (
-                          <button
-                            onClick={handleNext}
-                            className="min-h-[44px] flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-colors"
-                          >
-                            <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</span>
-                            {currentStepIndex !== TOUR_STEPS.length - 1 && <ChevronRight size={16} />}
-                          </button>
-                        )}
+                        <button
+                          onClick={handleNext}
+                          className="min-h-[44px] flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-colors shadow-md shadow-indigo-600/30"
+                        >
+                          <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</span>
+                          {currentStepIndex !== TOUR_STEPS.length - 1 && <ChevronRight size={16} />}
+                        </button>
                       </div>
                     </div>
-                    
-                    {currentStep.waitForClick && (
-                      <div className="mt-4 flex justify-end">
-                        <span className="text-xs text-indigo-400 animate-pulse flex items-center gap-1">
-                          Click the highlighted button to continue <ChevronRight size={14} />
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </motion.div>
-              )}
             </AnimatePresence>
           </motion.div>
         </>
@@ -392,4 +403,3 @@ export function OnboardingTour({ isActive, onComplete }: OnboardingTourProps) {
     </AnimatePresence>
   );
 }
-
